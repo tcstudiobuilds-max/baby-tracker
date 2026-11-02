@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cradl – Modern 24h Baby Routine & Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        },
+                        accent: {
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        canvas {
+            touch-action: none;
+        }
+        /* Custom scrollbar styling for compact tab scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-brand-500 selection:text-white min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xl shadow-inner shrink-0">
+                    <i class="fa-solid fa-baby"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold leading-tight text-slate-900 tracking-tight">Cradl</h1>
+                    <p class="text-xs text-slate-500">Soft design for fast baby logging</p>
+                </div>
+            </div>
+            <button id="exportCsvBtn" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-3 rounded-lg border border-slate-200 flex items-center space-x-1.5 transition shrink-0">
+                <i class="fa-solid fa-download"></i>
+                <span class="hidden sm:inline">Export</span> CSV
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container - Responsive Layout -->
+    <main class="flex-1 max-w-md sm:max-w-lg lg:max-w-2xl w-full mx-auto p-3 sm:p-4 space-y-4 pb-12">
+
+        <!-- Banner Alert for Simulation status -->
+        <div id="statusToast" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3 py-2 rounded-xl flex justify-between items-center transition">
+            <span id="statusToastText">Logged successfully!</span>
+            <button onclick="hideToast()" class="text-emerald-500 hover:text-emerald-700"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Section 1: Real-Time Clock & Tentative Next Feed Hero Card -->
+        <div class="bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-4 sm:p-5 text-white shadow-lg shadow-brand-500/20 relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl pointer-events-none">
+                <i class="fa-solid fa-bottle-droplet"></i>
+            </div>
+
+            <div class="relative z-10 space-y-4">
+                <!-- 1. Current Time Display -->
+                <div>
+                    <div class="flex justify-between items-center">
+                        <span class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-medium">
+                            <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                            Live Clock
+                        </span>
+                        <span id="currentDateText" class="text-xs text-brand-100 font-medium">--</span>
+                    </div>
+                    <div id="currentTimeText" class="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">--:--:-- --</div>
+                </div>
+
+                <!-- 2. Tentative Next Feed (Positioned Directly Below Current Time) -->
+                <div class="pt-3 border-t border-white/20">
+                    <div class="flex flex-wrap justify-between items-start gap-2">
+                        <div>
+                            <div class="text-[11px] font-semibold uppercase tracking-wider text-brand-100">Tentative Next Feed (3h Target)</div>
+                            <div id="predictedTimeText" class="text-xl sm:text-2xl font-bold tracking-tight text-white mt-0.5">--:-- --</div>
+                        </div>
+                        <span id="countdownText" class="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-white">
+                            <i class="fa-regular fa-clock"></i> Calculating...
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-brand-100 mt-2">
+                        <span id="lastFeedTimeAgo">Last feed: --</span>
+                        <span>Daily Target: <strong class="text-white">600 mL</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Quick Log Buttons & Multi-Activity Tabs -->
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-sm border border-slate-200/80 space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-brand-600"></i> Log Activity
+                </h2>
+                <!-- Time Mode Toggle -->
+                <div class="flex items-center gap-1.5 text-xs">
+                    <label class="text-slate-500 font-medium cursor-pointer" for="manualTimeToggle">Custom Time</label>
+                    <input type="checkbox" id="manualTimeToggle" onchange="toggleManualTimeInput()" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Manual Time Input (Hidden by default) -->
+            <div id="manualTimeContainer" class="hidden bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <label class="text-slate-600 font-semibold flex items-center gap-1">
+                        <i class="fa-regular fa-clock text-slate-400"></i> Event Date & Time:
+                    </label>
+                    <button type="button" onclick="resetTimestampToNow()" class="text-brand-600 font-semibold hover:underline">Set to Now</button>
+                </div>
+                <input type="datetime-local" id="manualTimestampInput" class="bg-white border border-slate-200 rounded-lg p-1.5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-brand-500 w-full">
+            </div>
+
+            <!-- Activity Tabs (Scrollable on small screens) -->
+            <div class="flex border-b border-slate-100 text-xs font-semibold text-slate-500 overflow-x-auto no-scrollbar">
+                <button id="tabMilkBtn" onclick="switchTab('milk')" class="flex-1 min-w-[65px] py-2 px-2 text-center text-brand-600 border-b-2 border-brand-600 transition whitespace-nowrap">Milk</button>
+                <button id="tabDiaperBtn" onclick="switchTab('diaper')" class="flex-1 min-w-[65px] py-2 px-2 text-center hover:text-slate-700 transition whitespace-nowrap">Diaper</button>
+                <button id="tabShowerBtn" onclick="switchTab('shower')" class="flex-1 min-w-[65px] py-2 px-2 text-center hover:text-slate-700 transition whitespace-nowrap">Shower</button>
+                <button id="tabSleepBtn" onclick="switchTab('sleep')" class="flex-1 min-w-[65px] py-2 px-2 text-center hover:text-slate-700 transition whitespace-nowrap">Sleep</button>
+                <button id="tabVitaminBtn" onclick="switchTab('vitamin')" class="flex-1 min-w-[75px] py-2 px-2 text-center hover:text-slate-700 transition whitespace-nowrap">Vitamin D</button>
+            </div>
+
+            <!-- Tab Content: Milk -->
+            <div id="tabMilkContent" class="space-y-3">
+                <div class="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 gap-2">
+                    <button onclick="quickLogMilk(120)" class="preset-btn py-2.5 px-2 bg-slate-50 hover:bg-brand-50 hover:border-brand-500 border border-slate-200 rounded-xl text-center font-bold text-slate-700 hover:text-brand-600 transition active:scale-95">
+                        120 <span class="text-xs font-normal text-slate-400 block">mL</span>
+                    </button>
+                    <button onclick="quickLogMilk(150)" class="preset-btn py-2.5 px-2 bg-slate-50 hover:bg-brand-50 hover:border-brand-500 border border-slate-200 rounded-xl text-center font-bold text-slate-700 hover:text-brand-600 transition active:scale-95">
+                        150 <span class="text-xs font-normal text-slate-400 block">mL</span>
+                    </button>
+                    <button onclick="quickLogMilk(180)" class="preset-btn py-2.5 px-2 bg-slate-50 hover:bg-brand-50 hover:border-brand-500 border border-slate-200 rounded-xl text-center font-bold text-slate-700 hover:text-brand-600 transition active:scale-95">
+                        180 <span class="text-xs font-normal text-slate-400 block">mL</span>
+                    </button>
+                    <button onclick="quickLogMilk(210)" class="preset-btn py-2.5 px-2 bg-slate-50 hover:bg-brand-50 hover:border-brand-500 border border-slate-200 rounded-xl text-center font-bold text-slate-700 hover:text-brand-600 transition active:scale-95">
+                        210 <span class="text-xs font-normal text-slate-400 block">mL</span>
+                    </button>
+                </div>
+                <form id="customFeedForm" onsubmit="handleCustomMilkSubmit(event)" class="pt-2 border-t border-slate-100 flex gap-2">
+                    <input type="number" id="customVolumeInput" placeholder="Custom mL" min="10" max="500" required
+                        class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95 shrink-0">
+                        Save Milk
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tab Content: Diaper -->
+            <div id="tabDiaperContent" class="hidden space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1.5"><i class="fa-solid fa-droplet text-amber-500"></i> Pee Level</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="logDiaper('PEE', '+')" class="py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-amber-800 font-bold text-xs transition active:scale-95">+ (Light)</button>
+                        <button onclick="logDiaper('PEE', '++')" class="py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-amber-800 font-bold text-xs transition active:scale-95">++ (Medium)</button>
+                        <button onclick="logDiaper('PEE', '+++')" class="py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-amber-800 font-bold text-xs transition active:scale-95">+++ (Heavy)</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1.5"><i class="fa-solid fa-poop text-amber-700"></i> Poo Level</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="logDiaper('POO', '+')" class="py-2 bg-amber-100/70 hover:bg-amber-200/70 border border-amber-300 rounded-xl text-amber-900 font-bold text-xs transition active:scale-95">+ (Small)</button>
+                        <button onclick="logDiaper('POO', '++')" class="py-2 bg-amber-100/70 hover:bg-amber-200/70 border border-amber-300 rounded-xl text-amber-900 font-bold text-xs transition active:scale-95">++ (Medium)</button>
+                        <button onclick="logDiaper('POO', '+++')" class="py-2 bg-amber-100/70 hover:bg-amber-200/70 border border-amber-300 rounded-xl text-amber-900 font-bold text-xs transition active:scale-95">+++ (Large)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Shower -->
+            <div id="tabShowerContent" class="hidden py-2 space-y-2">
+                <p class="text-xs text-slate-500">Log bath / shower time for baby</p>
+                <button onclick="logShower()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-shower"></i> Record Shower / Bath
+                </button>
+            </div>
+
+            <!-- Tab Content: Sleep -->
+            <div id="tabSleepContent" class="hidden space-y-3">
+                <label class="text-xs font-semibold text-slate-600 block"><i class="fa-solid fa-moon text-indigo-500"></i> Quick Nap Presets</label>
+                <div class="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 gap-2">
+                    <button onclick="logSleep(30)" class="py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl text-indigo-800 font-bold text-xs transition active:scale-95">30m</button>
+                    <button onclick="logSleep(45)" class="py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl text-indigo-800 font-bold text-xs transition active:scale-95">45m</button>
+                    <button onclick="logSleep(60)" class="py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl text-indigo-800 font-bold text-xs transition active:scale-95">1h</button>
+                    <button onclick="logSleep(90)" class="py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl text-indigo-800 font-bold text-xs transition active:scale-95">1.5h</button>
+                </div>
+                <form onsubmit="handleCustomSleepSubmit(event)" class="pt-2 border-t border-slate-100 flex gap-2">
+                    <input type="number" id="customSleepMinutes" placeholder="Custom minutes" min="5" max="720" required
+                        class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95 shrink-0">
+                        Log Sleep
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tab Content: Vitamin D -->
+            <div id="tabVitaminContent" class="hidden py-2 space-y-2">
+                <p class="text-xs text-slate-500">Record daily Vitamin D drops or supplements</p>
+                <button onclick="logVitaminD()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl text-sm font-semibold shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-sun"></i> Record Vitamin D (1 Drop)
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Today's Intake Summary & Dynamic Canvas Chart -->
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-sm border border-slate-200/80 space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900">Weekly Intake Trend</h2>
+                    <p class="text-xs text-slate-500">Tap a bar to see exact breakdown</p>
+                </div>
+                <div class="text-right">
+                    <div id="todayTotalText" class="text-lg font-extrabold text-brand-600">0 mL</div>
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Today's Total</div>
+                </div>
+            </div>
+
+            <!-- Interactive Canvas Chart (Flexible height canvas) -->
+            <div class="relative bg-slate-50 rounded-xl p-2 border border-slate-100 overflow-hidden">
+                <canvas id="trendChart" class="w-full h-44 sm:h-48 rounded-lg cursor-pointer"></canvas>
+                
+                <!-- Tooltip Popup Overlay -->
+                <div id="chartTooltip" class="hidden absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-lg shadow-md pointer-events-none transition-opacity z-20">
+                    <span id="tooltipContent">Day: 0 mL</span>
+                </div>
+            </div>
+
+            <!-- 24-Hour Feeding Timeline Visualization -->
+            <div class="pt-3 border-t border-slate-100 space-y-2">
+                <div class="flex flex-wrap justify-between items-center gap-1.5">
+                    <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-timeline text-brand-600"></i> Today's 24-Hour Timeline
+                    </h3>
+                    <div class="flex flex-wrap gap-2 text-[10px]">
+                        <span class="flex items-center gap-1 text-slate-500"><span class="w-2 h-2 rounded-full bg-teal-600"></span>Milk</span>
+                        <span class="flex items-center gap-1 text-slate-500"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Pee</span>
+                        <span class="flex items-center gap-1 text-slate-500"><span class="w-2 h-2 rounded-full bg-amber-800"></span>Poo</span>
+                        <span class="flex items-center gap-1 text-slate-500"><span class="w-2 h-2 rounded-full bg-cyan-500"></span>Bath</span>
+                        <span class="flex items-center gap-1 text-slate-500"><span class="w-2 h-2 rounded-full bg-purple-600"></span>Vit D</span>
+                    </div>
+                </div>
+                <div class="relative bg-slate-50 rounded-xl p-2.5 border border-slate-100 overflow-hidden">
+                    <canvas id="timeline24hCanvas" class="w-full h-20 rounded-lg cursor-pointer"></canvas>
+                    <div id="timelineTooltip" class="hidden absolute bottom-1 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[11px] py-1 px-2.5 rounded-md shadow-md pointer-events-none z-20">
+                        <span id="timelineTooltipText">1:00 PM - 180 mL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Log History Stream -->
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 shadow-sm border border-slate-200/80 space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-900">Recent Activity Log</h2>
+                <button onclick="clearData()" class="text-xs text-rose-500 hover:text-rose-700 font-medium">Reset Demo</button>
+            </div>
+
+            <div id="feedLogList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <!-- Log items rendered dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Data Structure Key for LocalStorage
+        const STORAGE_KEY = 'cradl_entries_v1';
+        const DEFAULT_TARGET_ML = 600;
+        const TARGET_FEED_INTERVAL_MS = 3 * 60 * 60 * 1000; // Strictly 3 Hours
+
+        // In-Memory State
+        let feedEntries = [];
+        let selectedBarIndex = null;
+        let activeTab = 'milk';
+
+        // Initialize App on Window Load & Handle Window Resize
+        window.onload = function() {
+            loadEntries();
+            renderAll();
+            setupCanvasInteraction();
+            startLiveClocks();
+
+            // Auto-redraw charts on window resize to ensure full screen adaptability
+            window.addEventListener('resize', () => {
+                renderChart();
+                render24hTimeline();
+            });
+        };
+
+        // Live Clock & Countdown Engine
+        function startLiveClocks() {
+            updateCurrentClock();
+            setInterval(updateCurrentClock, 1000);
+        }
+
+        function updateCurrentClock() {
+            const now = new Date();
+            document.getElementById('currentTimeText').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('currentDateText').innerText = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+            updateCountdownDisplay();
+        }
+
+        // UI Tab Switcher
+        function switchTab(tab) {
+            activeTab = tab;
+            ['milk', 'diaper', 'shower', 'sleep', 'vitamin'].forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const content = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Content`);
+                if (t === tab) {
+                    btn.className = "flex-1 py-2 px-2 text-center text-brand-600 border-b-2 border-brand-600 font-bold transition whitespace-nowrap";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "flex-1 py-2 px-2 text-center hover:text-slate-700 transition whitespace-nowrap";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        // Toggle Manual Time Field
+        function toggleManualTimeInput() {
+            const isManual = document.getElementById('manualTimeToggle').checked;
+            const container = document.getElementById('manualTimeContainer');
+            if (isManual) {
+                container.classList.remove('hidden');
+                resetTimestampToNow();
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function resetTimestampToNow() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('manualTimestampInput').value = now.toISOString().slice(0,16);
+        }
+
+        function getSelectedTimestamp() {
+            const isManual = document.getElementById('manualTimeToggle').checked;
+            if (isManual) {
+                const val = document.getElementById('manualTimestampInput').value;
+                if (val) return new Date(val).getTime();
+            }
+            return Date.now();
+        }
+
+        // Load data or inject sample fallback data
+        function loadEntries() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    feedEntries = JSON.parse(raw);
+                } catch(e) {
+                    feedEntries = getSampleData();
+                }
+            } else {
+                feedEntries = getSampleData();
+                saveEntries();
+            }
+        }
+
+        function saveEntries() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(feedEntries));
+        }
+
+        function getSampleData() {
+            const now = Date.now();
+            const HOUR = 3600000;
+            const DAY = 86400000;
+
+            return [
+                { id: 1, timestamp: now - (DAY * 4) + (HOUR * 2), category: 'MILK', volumeMl: 150, type: 'BOTTLE', notes: 'Formula' },
+                { id: 2, timestamp: now - (DAY * 4) + (HOUR * 6), category: 'MILK', volumeMl: 180, type: 'BOTTLE', notes: 'Formula' },
+                { id: 3, timestamp: now - (DAY * 3) + (HOUR * 3), category: 'MILK', volumeMl: 120, type: 'BOTTLE', notes: 'Pumped' },
+                { id: 4, timestamp: now - (DAY * 2) + (HOUR * 1), category: 'DIAPER', subType: 'PEE', intensity: '++', notes: 'Wet diaper' },
+                { id: 5, timestamp: now - (DAY * 2) + (HOUR * 5), category: 'SHOWER', notes: 'Evening bath' },
+                { id: 6, timestamp: now - (DAY * 1) + (HOUR * 2), category: 'MILK', volumeMl: 180, type: 'BOTTLE', notes: 'Formula' },
+                { id: 7, timestamp: now - (DAY * 1) + (HOUR * 4), category: 'DIAPER', subType: 'POO', intensity: '+++', notes: 'Large diaper' },
+                { id: 8, timestamp: now - (HOUR * 4), category: 'VITAMIN', notes: 'Vitamin D 1 Drop' },
+                { id: 9, timestamp: now - (HOUR * 3), category: 'SHOWER', notes: 'Bath' },
+                { id: 10, timestamp: now - (HOUR * 2), category: 'DIAPER', subType: 'PEE', intensity: '++', notes: 'Pee' },
+                { id: 11, timestamp: now - (HOUR * 1), category: 'DIAPER', subType: 'POO', intensity: '++', notes: 'Poo' },
+                { id: 12, timestamp: now - (HOUR * 0.5), category: 'MILK', volumeMl: 150, type: 'BOTTLE', notes: 'Recent feed' }
+            ];
+        }
+
+        // Quick log milk handler
+        function quickLogMilk(volume) {
+            addFeedEntry(volume, "Quick log preset");
+        }
+
+        function handleCustomMilkSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('customVolumeInput');
+            const volume = parseFloat(input.value);
+            if (volume && volume > 0) {
+                addFeedEntry(volume, "Custom entry");
+                input.value = '';
+            }
+        }
+
+        function addFeedEntry(volumeMl, notes) {
+            const entry = {
+                id: Date.now(),
+                timestamp: getSelectedTimestamp(),
+                category: 'MILK',
+                volumeMl: volumeMl,
+                type: 'BOTTLE',
+                notes: notes
+            };
+            insertAndSave(entry);
+            showToast(`Logged ${volumeMl} mL Milk!`);
+        }
+
+        // Log Diaper
+        function logDiaper(subType, intensity) {
+            const entry = {
+                id: Date.now(),
+                timestamp: getSelectedTimestamp(),
+                category: 'DIAPER',
+                subType: subType,
+                intensity: intensity,
+                notes: `${subType === 'PEE' ? 'Pee' : 'Poo'} (${intensity})`
+            };
+            insertAndSave(entry);
+            showToast(`Logged ${subType} (${intensity})!`);
+        }
+
+        // Log Shower
+        function logShower() {
+            const entry = {
+                id: Date.now(),
+                timestamp: getSelectedTimestamp(),
+                category: 'SHOWER',
+                notes: 'Shower / Bath'
+            };
+            insertAndSave(entry);
+            showToast(`Logged Shower Time!`);
+        }
+
+        // Log Vitamin D
+        function logVitaminD() {
+            const entry = {
+                id: Date.now(),
+                timestamp: getSelectedTimestamp(),
+                category: 'VITAMIN',
+                notes: 'Vitamin D (1 Drop)'
+            };
+            insertAndSave(entry);
+            showToast(`Logged Vitamin D!`);
+        }
+
+        // Log Sleep
+        function logSleep(durationMinutes) {
+            const entry = {
+                id: Date.now(),
+                timestamp: getSelectedTimestamp(),
+                category: 'SLEEP',
+                durationMinutes: durationMinutes,
+                notes: `Slept ${durationMinutes} mins`
+            };
+            insertAndSave(entry);
+            showToast(`Logged ${durationMinutes}m Sleep!`);
+        }
+
+        function handleCustomSleepSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('customSleepMinutes');
+            const mins = parseInt(input.value);
+            if (mins && mins > 0) {
+                logSleep(mins);
+                input.value = '';
+            }
+        }
+
+        function insertAndSave(entry) {
+            feedEntries.push(entry);
+            feedEntries.sort((a, b) => b.timestamp - a.timestamp);
+            saveEntries();
+            renderAll();
+        }
+
+        function clearData() {
+            if (confirm("Reset all activity entries to sample data?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                loadEntries();
+                renderAll();
+                showToast("Sandbox reset to sample data.");
+            }
+        }
+
+        function renderTodayTotal() {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const endOfDay = startOfDay + 86400000;
+
+            const todayTotal = feedEntries
+                .filter(e => e.category === 'MILK' && e.timestamp >= startOfDay && e.timestamp < endOfDay)
+                .reduce((sum, e) => sum + (e.volumeMl || 0), 0);
+
+            const totalElem = document.getElementById('todayTotalText');
+            if (totalElem) {
+                totalElem.innerText = `${Math.round(todayTotal)} mL`;
+            }
+        }
+
+        function renderAll() {
+            renderTodayTotal();
+            renderPrediction();
+            renderLogList();
+            renderChart();
+            render24hTimeline();
+        }
+
+        // Interactive 24-Hour Horizontal Timeline Canvas
+        let timelineHitboxes = [];
+
+        function render24hTimeline() {
+            const canvas = document.getElementById('timeline24hCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+
+            const paddingX = 24;
+            const lineY = height - 18;
+            const timelineWidth = width - (paddingX * 2);
+
+            ctx.clearRect(0, 0, width, height);
+            timelineHitboxes = [];
+
+            // Background Base Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.moveTo(paddingX, lineY);
+            ctx.lineTo(width - paddingX, lineY);
+            ctx.stroke();
+
+            // Draw Hour Tick Marks (Every 3 hours: 0, 3, 6, 9, 12, 15, 18, 21, 24)
+            const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+            const tickLabels = ['12A', '3A', '6A', '9A', '12P', '3P', '6P', '9P', '12A'];
+
+            tickHours.forEach((hour, idx) => {
+                const x = paddingX + (hour / 24) * timelineWidth;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 1;
+                ctx.moveTo(x, lineY - 3);
+                ctx.lineTo(x, lineY + 4);
+                ctx.stroke();
+
+                ctx.fillStyle = '#64748b';
+                ctx.font = '9px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(tickLabels[idx], x, height - 2);
+            });
+
+            // Get Today's Activity Feeds
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const endOfDay = startOfDay + 86400000;
+
+            const todayEntries = feedEntries.filter(e => 
+                e.timestamp >= startOfDay && 
+                e.timestamp < endOfDay
+            );
+
+            // Draw Activity Markers
+            todayEntries.forEach(entry => {
+                const d = new Date(entry.timestamp);
+                const hoursFloat = d.getHours() + (d.getMinutes() / 60);
+                const x = paddingX + (hoursFloat / 24) * timelineWidth;
+                const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let markerColor = '#0d9488';
+                let descStr = '';
+
+                if (entry.category === 'MILK') {
+                    markerColor = '#0d9488';
+                    descStr = `${entry.volumeMl} mL Milk`;
+
+                    // Thick Milk Bar
+                    ctx.beginPath();
+                    ctx.strokeStyle = markerColor;
+                    ctx.lineWidth = 4;
+                    ctx.lineCap = 'round';
+                    ctx.moveTo(x, lineY - 24);
+                    ctx.lineTo(x, lineY + 2);
+                    ctx.stroke();
+
+                    // Text volume above
+                    ctx.fillStyle = '#0f766e';
+                    ctx.font = 'bold 9px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${entry.volumeMl}m`, x, lineY - 28);
+
+                } else if (entry.category === 'DIAPER') {
+                    if (entry.subType === 'PEE') {
+                        markerColor = '#f59e0b'; // Amber
+                        descStr = `Pee (${entry.intensity})`;
+                    } else {
+                        markerColor = '#78350f'; // Brown
+                        descStr = `Poo (${entry.intensity})`;
+                    }
+
+                    // Dot Marker
+                    ctx.beginPath();
+                    ctx.fillStyle = markerColor;
+                    ctx.arc(x, lineY - 10, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                } else if (entry.category === 'SHOWER') {
+                    markerColor = '#06b6d4'; // Cyan
+                    descStr = 'Shower / Bath';
+
+                    // Diamond Marker
+                    ctx.beginPath();
+                    ctx.fillStyle = markerColor;
+                    ctx.moveTo(x, lineY - 18);
+                    ctx.lineTo(x + 4, lineY - 14);
+                    ctx.lineTo(x, lineY - 10);
+                    ctx.lineTo(x - 4, lineY - 14);
+                    ctx.closePath();
+                    ctx.fill();
+
+                } else if (entry.category === 'VITAMIN') {
+                    markerColor = '#9333ea'; // Purple
+                    descStr = 'Vitamin D (1 Drop)';
+
+                    // Vertical Purple Marker Line
+                    ctx.beginPath();
+                    ctx.strokeStyle = markerColor;
+                    ctx.lineWidth = 2.5;
+                    ctx.moveTo(x, lineY - 18);
+                    ctx.lineTo(x, lineY + 2);
+                    ctx.stroke();
+
+                    // Star/Circle Cap
+                    ctx.beginPath();
+                    ctx.fillStyle = markerColor;
+                    ctx.arc(x, lineY - 18, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Save hitbox for interaction
+                timelineHitboxes.push({
+                    x: x - 8,
+                    w: 16,
+                    entry: entry,
+                    timeStr: timeStr,
+                    descStr: descStr
+                });
+            });
+
+            setupTimelineInteraction();
+        }
+
+        function setupTimelineInteraction() {
+            const canvas = document.getElementById('timeline24hCanvas');
+            const tooltip = document.getElementById('timelineTooltip');
+            if (!canvas || !tooltip) return;
+
+            canvas.onclick = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+
+                const hit = timelineHitboxes.find(h => clickX >= h.x && clickX <= (h.x + h.w));
+                if (hit) {
+                    document.getElementById('timelineTooltipText').innerText = `${hit.timeStr} • ${hit.descStr}`;
+                    tooltip.classList.remove('hidden');
+                } else {
+                    tooltip.classList.add('hidden');
+                }
+            };
+        }
+
+        // 3-Hour Prediction Logic
+        function renderPrediction() {
+            const milkFeeds = feedEntries
+                .filter(e => e.category === 'MILK')
+                .sort((a, b) => a.timestamp - b.timestamp);
+
+            if (milkFeeds.length === 0) {
+                document.getElementById('predictedTimeText').innerText = "--:--";
+                document.getElementById('countdownText').innerText = "No feeds logged";
+                return;
+            }
+
+            const lastFeed = milkFeeds[milkFeeds.length - 1];
+            const predictedTimestamp = lastFeed.timestamp + TARGET_FEED_INTERVAL_MS; // Exactly +3 Hours
+            const predDate = new Date(predictedTimestamp);
+            const lastDate = new Date(lastFeed.timestamp);
+
+            document.getElementById('predictedTimeText').innerText = predDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastFeedTimeAgo').innerText = `Last feed: ${lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+            window.targetPredictedTimestamp = predictedTimestamp;
+            updateCountdownDisplay();
+        }
+
+        function updateCountdownDisplay() {
+            if (!window.targetPredictedTimestamp) return;
+            const diffMs = window.targetPredictedTimestamp - Date.now();
+            const countElem = document.getElementById('countdownText');
+
+            if (diffMs > 0) {
+                const mins = Math.round(diffMs / 60000);
+                const hrs = Math.floor(mins / 60);
+                const remMins = mins % 60;
+                countElem.innerHTML = `<i class="fa-regular fa-clock"></i> Due in ${hrs > 0 ? hrs + 'h ' : ''}${remMins}m`;
+            } else {
+                const overdueMins = Math.abs(Math.round(diffMs / 60000));
+                countElem.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-300"></i> Due now (${overdueMins}m ago)`;
+            }
+        }
+
+        function renderLogList() {
+            const container = document.getElementById('feedLogList');
+            container.innerHTML = '';
+
+            if (feedEntries.length === 0) {
+                container.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">No activity logged yet</div>`;
+                return;
+            }
+
+            feedEntries.slice(0, 15).forEach(entry => {
+                const date = new Date(entry.timestamp);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+                let iconHtml = '';
+                let titleHtml = '';
+                let badgeHtml = '';
+
+                if (entry.category === 'DIAPER') {
+                    if (entry.subType === 'PEE') {
+                        iconHtml = `<div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold"><i class="fa-solid fa-droplet"></i></div>`;
+                        titleHtml = `Pee Diaper <span class="text-amber-600 font-extrabold">${entry.intensity}</span>`;
+                        badgeHtml = `<span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-semibold">Pee ${entry.intensity}</span>`;
+                    } else {
+                        iconHtml = `<div class="w-7 h-7 rounded-lg bg-amber-900/10 text-amber-800 flex items-center justify-center font-bold"><i class="fa-solid fa-poop"></i></div>`;
+                        titleHtml = `Poo Diaper <span class="text-amber-800 font-extrabold">${entry.intensity}</span>`;
+                        badgeHtml = `<span class="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-md font-semibold">Poo ${entry.intensity}</span>`;
+                    }
+                } else if (entry.category === 'SHOWER') {
+                    iconHtml = `<div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold"><i class="fa-solid fa-shower"></i></div>`;
+                    titleHtml = `Shower / Bath`;
+                    badgeHtml = `<span class="text-[10px] bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-md font-semibold">Shower</span>`;
+                } else if (entry.category === 'VITAMIN') {
+                    iconHtml = `<div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold"><i class="fa-solid fa-sun"></i></div>`;
+                    titleHtml = `Vitamin D (1 Drop)`;
+                    badgeHtml = `<span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-semibold">Vitamin D</span>`;
+                } else if (entry.category === 'SLEEP') {
+                    const hrs = Math.floor(entry.durationMinutes / 60);
+                    const mins = entry.durationMinutes % 60;
+                    const durationStr = `${hrs > 0 ? hrs + 'h ' : ''}${mins}m`;
+                    iconHtml = `<div class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold"><i class="fa-solid fa-moon"></i></div>`;
+                    titleHtml = `Sleep Nap (${durationStr})`;
+                    badgeHtml = `<span class="text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-semibold">${durationStr}</span>`;
+                } else {
+                    // MILK
+                    iconHtml = `<div class="w-7 h-7 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold"><i class="fa-solid fa-bottle-droplet"></i></div>`;
+                    titleHtml = `${entry.volumeMl} mL Milk`;
+                    badgeHtml = `<span class="text-[10px] bg-slate-200/60 text-slate-600 px-2 py-0.5 rounded-md">${entry.notes || 'Bottle'}</span>`;
+                }
+
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs hover:bg-slate-100/80 transition';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        ${iconHtml}
+                        <div>
+                            <div class="font-bold text-slate-800">${titleHtml}</div>
+                            <div class="text-[10px] text-slate-400">${dateStr} at ${timeStr}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${badgeHtml}
+                        <button onclick="deleteEntry(${entry.id})" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteEntry(id) {
+            feedEntries = feedEntries.filter(e => e.id !== id);
+            saveEntries();
+            renderAll();
+            showToast("Entry removed");
+        }
+
+        // Interactive HTML5 Canvas Bar Chart Rendering
+        let barHitboxes = [];
+
+        function renderChart() {
+            const canvas = document.getElementById('trendChart');
+            const ctx = canvas.getContext('2d');
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const paddingBottom = 30;
+            const paddingTop = 25;
+            const chartAreaHeight = height - paddingBottom - paddingTop;
+
+            const daysData = get7DayAggregatedData();
+            const maxVolume = Math.max(DEFAULT_TARGET_ML * 1.1, ...daysData.map(d => d.totalMl));
+
+            ctx.clearRect(0, 0, width, height);
+            barHitboxes = [];
+
+            // Target Line
+            const targetY = paddingTop + (1 - (DEFAULT_TARGET_ML / maxVolume)) * chartAreaHeight;
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(0, targetY);
+            ctx.lineTo(width, targetY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.fillText('Target 600mL', 10, targetY - 4);
+
+            const numBars = daysData.length;
+            const barWidth = (width / numBars) * 0.55;
+            const gap = (width / numBars) * 0.45;
+
+            daysData.forEach((d, i) => {
+                const x = (i * (barWidth + gap)) + (gap / 2);
+                const barHeight = (d.totalMl / maxVolume) * chartAreaHeight;
+                const y = paddingTop + (chartAreaHeight - barHeight);
+
+                barHitboxes.push({
+                    x: x,
+                    y: paddingTop,
+                    w: barWidth,
+                    h: chartAreaHeight + paddingBottom,
+                    data: d
+                });
+
+                const isSelected = selectedBarIndex === i;
+                const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+                if (isSelected) {
+                    gradient.addColorStop(0, '#0d9488');
+                    gradient.addColorStop(1, '#14b8a6');
+                } else {
+                    gradient.addColorStop(0, '#14b8a6');
+                    gradient.addColorStop(1, '#99f6e4');
+                }
+
+                ctx.fillStyle = gradient;
+                drawRoundedRect(ctx, x, y, barWidth, Math.max(barHeight, 4), 6);
+
+                ctx.fillStyle = isSelected ? '#0f766e' : '#64748b';
+                ctx.font = `${isSelected ? 'bold' : 'normal'} 10px Inter, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(d.totalMl)}`, x + (barWidth / 2), y - 6);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.fillText(d.dayLabel, x + (barWidth / 2), height - 8);
+            });
+        }
+
+        function setupCanvasInteraction() {
+            const canvas = document.getElementById('trendChart');
+            const tooltip = document.getElementById('chartTooltip');
+
+            canvas.addEventListener('click', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+
+                const hit = barHitboxes.find(b => clickX >= b.x && clickX <= (b.x + b.w));
+                if (hit) {
+                    const index = barHitboxes.indexOf(hit);
+                    selectedBarIndex = index;
+                    renderChart();
+
+                    document.getElementById('tooltipContent').innerText = `${hit.data.dayLabel}: ${hit.data.totalMl} mL milk`;
+                    tooltip.classList.remove('hidden');
+                } else {
+                    selectedBarIndex = null;
+                    renderChart();
+                    tooltip.classList.add('hidden');
+                }
+            });
+        }
+
+        function get7DayAggregatedData() {
+            const result = [];
+            const now = new Date();
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+                const startMs = d.getTime();
+                const endMs = startMs + 86400000;
+
+                const totalMl = feedEntries
+                    .filter(e => e.category === 'MILK' && e.timestamp >= startMs && e.timestamp < endMs)
+                    .reduce((sum, e) => sum + (e.volumeMl || 0), 0);
+
+                const dayLabel = i === 0 ? 'Today' : d.toLocaleDateString([], { weekday: 'short' });
+                result.push({ dayLabel, totalMl, dateStr: d.toLocaleDateString() });
+            }
+            return result;
+        }
+
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x, y + height);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // CSV Export Functionality
+        document.getElementById('exportCsvBtn').addEventListener('click', function() {
+            if (feedEntries.length === 0) {
+                alert("No activity records to export.");
+                return;
+            }
+
+            const headers = ["ID", "Timestamp", "Date Time", "Category", "Details", "Volume (mL)", "Notes"];
+            const rows = feedEntries.map(e => {
+                let details = '';
+                if (e.category === 'DIAPER') details = `${e.subType} (${e.intensity})`;
+                else if (e.category === 'SLEEP') details = `${e.durationMinutes} mins`;
+                else details = e.type || '';
+
+                return [
+                    e.id,
+                    e.timestamp,
+                    `"${new Date(e.timestamp).toLocaleString()}"`,
+                    e.category,
+                    `"${details}"`,
+                    e.volumeMl || '',
+                    `"${e.notes || ''}"`
+                ];
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `cradl_activity_log_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('statusToast');
+            document.getElementById('statusToastText').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+        }
+        function hideToast() {
+            document.getElementById('statusToast').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
