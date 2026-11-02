@@ -2,570 +2,2217 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Cradl – Baby Tracker</title>
+<meta name="theme-color" content="#0b4f4a" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1413" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
 <style>
-:root{--bg:#eaf3f1;--card:#fff;--ink:#12302f;--mut:#5b7270;--line:#d5e3e0;--chip:#eef5f4;--btn:#0f766e;--on:#fff;--h1:#0b4f4a;--h2:#0f766e;--milk:#0f766e;--pee:#e8a33d;--poo:#8a5a2b;--bath:#0891b2;--vit:#9333ea;--slp:#4f46e5;--bad:#e11d48;--ok:#6ee7b7;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1413;--card:#122120;--ink:#e3f1ee;--mut:#95b0ac;--line:#213836;--chip:#1a2e2c;--btn:#2dd4bf;--on:#042f2e;--h1:#0a2f2c;--h2:#0e4a45;--milk:#2dd4bf;--pee:#f0b45a;--poo:#c58a4e;--bath:#22d3ee;--vit:#c084fc;--slp:#818cf8;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0a1413;--card:#122120;--ink:#e3f1ee;--mut:#95b0ac;--line:#213836;--chip:#1a2e2c;--btn:#2dd4bf;--on:#042f2e;--h1:#0a2f2c;--h2:#0e4a45;--milk:#2dd4bf;--pee:#f0b45a;--poo:#c58a4e;--bath:#22d3ee;--vit:#c084fc;--slp:#818cf8;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
-*,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
-button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;transition:transform .12s cubic-bezier(0.4,0,0.2,1),opacity .12s}
-button:focus-visible,input:focus-visible{outline:3px solid var(--btn);outline-offset:2px}
-.app{max-width:560px;margin:0 auto;padding:12px 14px 40px;display:grid;gap:14px;animation:fadeIn .3s ease-out}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-header{display:flex;align-items:center;gap:10px}
-header b{font:700 22px Fraunces,Georgia,serif;display:block;line-height:1.1}
-header small,.mut{color:var(--mut);font-size:13px}
-.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--h1),var(--h2));display:grid;place-items:center;box-shadow:0 4px 12px rgba(15,118,110,.25);overflow:hidden;flex:none}
-.logo img{width:100%;height:100%;object-fit:cover}
-header .sp{flex:1}
-.ib{width:44px;height:44px;border-radius:12px;background:var(--card);font-size:18px;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--line)}
-.ib:active{transform:scale(0.92)}
-.hero{background:linear-gradient(160deg,var(--h1),var(--h2));color:#fff;border-radius:28px 28px 20px 20px;padding:18px;display:grid;gap:14px;box-shadow:0 10px 25px -5px rgba(11,79,74,.3)}
-.hero small{color:rgba(255,255,255,.85);font-size:13px}
-.hr{display:flex;justify-content:space-between;align-items:baseline}
-.clock{font:700 30px Fraunces,Georgia,serif;letter-spacing:-.5px}
-.hm{display:flex;gap:16px;align-items:center}
-.ring{position:relative;width:104px;height:104px;flex:none}
-.ring svg{width:100%;height:100%}
-.r0{fill:none;stroke:rgba(255,255,255,.2);stroke-width:8}
-.r1{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(0.4,0,0.2,1)}
-.rt{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.rt b{font:700 24px Fraunces,Georgia,serif;line-height:1}
-.next{font:700 30px Fraunces,Georgia,serif;line-height:1.1;margin:2px 0 6px}
-.pill{display:inline-block;padding:5px 12px;border-radius:99px;font-size:14px;font-weight:600;background:rgba(255,255,255,.18)}
-.pill.soon{background:#fde68a;color:#78350f}
-.pill.over{background:#fecdd3;color:#881337}
-.quick{width:100%;min-height:60px;border-radius:16px;background:#fff;color:#0b4f4a;font-size:19px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:transform .12s,background .12s}
-.quick:active,.tile:active,.big:active,.go:active{transform:scale(0.97)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stats div{background:rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;backdrop-filter:blur(4px)}
-.stats b{display:block;font-size:15px}
-.box{background:var(--card);border-radius:20px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--line)}
-h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:44px;padding:0 16px;border-radius:99px;background:var(--chip);font-weight:600;font-size:14px;border:1px solid transparent;transition:all .15s}
-.chip.on{background:var(--btn);color:var(--on);box-shadow:0 2px 8px rgba(15,118,110,.3)}
-.custom-time-box{display:none;margin-bottom:12px;padding:12px;background:var(--chip);border-radius:14px;gap:8px;align-items:center;border:1px solid var(--line)}
-.custom-time-box.on{display:flex;animation:fadeIn .2s ease-out}
-.custom-time-box input[type="datetime-local"]{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 10px;font-size:14px;font-family:inherit}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.tile{min-height:88px;border-radius:18px;background:var(--chip);display:grid;place-content:center;gap:2px;font-weight:600;font-size:15px;text-align:center;border-bottom:4px solid var(--c);transition:transform .12s,background .12s}
-.tile span{font-size:28px;line-height:1}
-.chart{position:relative;height:130px;margin-top:6px}
-.cols{display:flex;gap:6px;height:100%;position:relative}
-.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
-.col .v{font-size:11px;color:var(--mut);margin-bottom:2px}
-.col .bar{width:68%;border-radius:8px 8px 3px 3px;background:var(--milk);opacity:.55;min-height:4px;transition:height .3s cubic-bezier(0.4,0,0.2,1)}
-.col.sel .bar{opacity:1}.col.sel .v{color:var(--ink);font-weight:700}
-.tg{position:absolute;left:0;right:0;border-top:2px dashed var(--bad);pointer-events:none}
-.tg small{position:absolute;right:0;top:-18px;color:var(--bad);font-size:11px;font-weight:600}
-.dl{display:flex;gap:6px;margin-top:4px}
-.dl span{flex:1;text-align:center;font-size:12px;color:var(--mut)}
-.det{min-height:20px;font-size:14px;margin:8px 0 0;color:var(--ink)}
-.tl{position:relative;height:104px;margin:6px 8px 0;border-bottom:2px solid var(--line)}
-.tl .lane{position:absolute;left:0;right:0;border-top:1px dashed var(--line)}
-.tl .tk{position:absolute;bottom:-20px;transform:translateX(-50%);font-size:11px;color:var(--mut)}
-.tl .now{position:absolute;top:0;bottom:0;width:2px;background:var(--bad);opacity:.7}
-.tl button{position:absolute;transform:translateX(-50%)}
-.mk{top:2px;height:34px;min-width:26px;padding:0 3px;border-radius:7px;background:var(--milk);color:var(--on);font-size:11px;font-weight:700}
-.dot{top:46px;width:24px;height:24px;border-radius:50%;font-size:13px;display:grid;place-items:center;background:var(--c)}
-.sl{top:78px;height:20px;border-radius:6px;background:var(--slp);transform:none!important;opacity:.85}
-.leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mut);margin:26px 0 0}
-.day{font-weight:700;font-size:14px;margin:12px 0 4px;color:var(--mut)}
-.it{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);animation:fadeIn .2s}
-.ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--chip);font-size:19px;flex:none}
-.tx{flex:1;min-width:0}.tx b{display:block;font-size:15px}.tx small{color:var(--mut)}
-.del{width:44px;height:44px;border-radius:12px;color:var(--mut);font-size:16px;transition:color .12s}
-.del:hover{color:var(--bad)}
-.foot{display:flex;gap:10px;justify-content:center}
-.foot button{min-height:44px;padding:0 14px;color:var(--mut);font-size:14px;text-decoration:underline}
-#scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s cubic-bezier(0.4,0,0.2,1);z-index:20;backdrop-filter:blur(2px)}
-#scrim.on{opacity:1;pointer-events:auto}
-#sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--card);border-radius:28px 28px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .3s cubic-bezier(0.16,1,0.3,1);z-index:21;display:grid;gap:12px;box-shadow:0 -10px 30px rgba(0,0,0,.15)}
-#sheet.on{transform:none}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.big{min-height:64px;border-radius:14px;background:var(--chip);font-weight:700;font-size:18px;display:grid;place-content:center;line-height:1.1;text-align:center;border:1px solid transparent;transition:all .12s}
-.big:hover{border-color:var(--btn)}
-.big small{font-size:12px;font-weight:500;color:var(--mut)}
-.cu{display:flex;gap:8px}
-.cu input{flex:1;min-width:0;min-height:52px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:0 14px;font-size:18px}
-.go{min-height:52px;padding:0 20px;border-radius:14px;background:var(--btn);color:var(--on);font-weight:700;box-shadow:0 4px 12px rgba(15,118,110,.25)}
-#toast{position:fixed;left:14px;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:532px;margin:0 auto;background:#12302f;color:#fff;border-radius:16px;padding:8px 8px 8px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:50;transform:translateY(160%);transition:transform .25s cubic-bezier(0.16,1,0.3,1);box-shadow:0 10px 25px rgba(0,0,0,.2)}
-#toast.on{transform:none}
-#toast button{min-height:40px;padding:0 16px;font-weight:700;color:#6ee7b7;border-radius:10px;background:rgba(255,255,255,.1)}
-.empty{color:var(--mut);padding:12px 0}
-.zc{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
-.zc .chip{min-width:44px;padding:0 12px}
-#zlab{font-size:13px;color:var(--mut);margin-left:auto}
-.rt small{font-size:11px}
-#tgt{cursor:pointer}
-.big.on{background:var(--btn);color:var(--on)}
-.big.on small{color:inherit}
-.tl{margin:6px 14px 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.code{font:700 26px Fraunces,Georgia,serif;letter-spacing:2px;text-align:center;user-select:all;-webkit-user-select:all;background:var(--chip);border-radius:14px;padding:14px;border:1px solid var(--line)}
-.sp2{margin:0;font-size:14px;color:var(--mut)}
-#wiz{position:fixed;inset:0;background:var(--bg);z-index:40;overflow-y:auto;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px));animation:fadeIn .2s}
-#wiz.on{display:block}
-.wz{max-width:560px;margin:0 auto;display:grid;gap:14px}
-.pbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
-.pbar i{display:block;height:100%;background:var(--btn);transition:width .3s cubic-bezier(0.4,0,0.2,1)}
-.wz pre{margin:0;padding:12px;border-radius:12px;background:var(--chip);font-size:12px;overflow-x:auto;border:1px solid var(--line)}
-.wz textarea{width:100%;min-height:140px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:12px;font:13px monospace}
-.lk{display:grid;place-items:center;min-height:52px;border-radius:14px;background:var(--chip);font-weight:700;text-decoration:none;color:var(--ink);border:1px solid var(--line);transition:background .12s}
-.lk:hover{background:var(--line)}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:root {
+  --bg: #eaf3f1;
+  --card: #fff;
+  --ink: #12302f;
+  --mut: #5b7270;
+  --line: #d5e3e0;
+  --chip: #eef5f4;
+  --btn: #0f766e;
+  --on: #fff;
+  --h1: #0b4f4a;
+  --h2: #0f766e;
+  --milk: #0f766e;
+  --pee: #e8a33d;
+  --poo: #8a5a2b;
+  --bath: #0891b2;
+  --vit: #9333ea;
+  --slp: #4f46e5;
+  --bad: #e11d48;
+  --ok: #6ee7b7;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1413;
+    --card: #122120;
+    --ink: #e3f1ee;
+    --mut: #95b0ac;
+    --line: #213836;
+    --chip: #1a2e2c;
+    --btn: #2dd4bf;
+    --on: #042f2e;
+    --h1: #0a2f2c;
+    --h2: #0e4a45;
+    --milk: #2dd4bf;
+    --pee: #f0b45a;
+    --poo: #c58a4e;
+    --bath: #22d3ee;
+    --vit: #c084fc;
+    --slp: #818cf8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1413;
+  --card: #122120;
+  --ink: #e3f1ee;
+  --mut: #95b0ac;
+  --line: #213836;
+  --chip: #1a2e2c;
+  --btn: #2dd4bf;
+  --on: #042f2e;
+  --h1: #0a2f2c;
+  --h2: #0e4a45;
+  --milk: #2dd4bf;
+  --pee: #f0b45a;
+  --poo: #c58a4e;
+  --bath: #22d3ee;
+  --vit: #c084fc;
+  --slp: #818cf8;
+  color-scheme: dark;
+}
+html {
+  scroll-padding-top: var(--safe-top);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  transition: transform .12s cubic-bezier(0.4,0,0.2,1), opacity .12s, background .15s;
+}
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--btn);
+  outline-offset: 2px;
+}
+button:active { transform: scale(0.96); }
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 14px calc(88px + var(--safe-bot));
+  display: grid;
+  gap: 14px;
+  animation: fadeIn .28s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  0% { transform: scale(0.92); opacity: 0; }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@keyframes slideUp {
+  from { transform: translateY(18px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: var(--safe-top);
+}
+header b {
+  font: 700 22px Fraunces, Georgia, serif;
+  display: block;
+  line-height: 1.1;
+}
+header small, .mut { color: var(--mut); font-size: 13px; }
+.logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--h1), var(--h2));
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(15,118,110,.25);
+  overflow: hidden;
+  flex: none;
+}
+.logo img { width: 100%; height: 100%; object-fit: cover; }
+header .sp { flex: 1; }
+.ib {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--card);
+  font-size: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+}
+.ib:active { transform: scale(0.92); }
+
+/* Hero */
+.hero {
+  background: linear-gradient(160deg, var(--h1), var(--h2));
+  color: #fff;
+  border-radius: 24px;
+  padding: 16px 16px 14px;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 10px 28px -6px rgba(11,79,74,.32);
+  position: relative;
+  overflow: hidden;
+}
+.hero small { color: rgba(255,255,255,.85); font-size: 13px; }
+.hr { display: flex; justify-content: space-between; align-items: baseline; }
+.clock { font: 700 28px Fraunces, Georgia, serif; letter-spacing: -.5px; }
+.hm { display: flex; gap: 14px; align-items: center; }
+.ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex: none;
+}
+.ring svg { width: 100%; height: 100%; }
+.r0 { fill: none; stroke: rgba(255,255,255,.2); stroke-width: 8; }
+.r1 {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .55s cubic-bezier(0.4,0,0.2,1);
+}
+.rt {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+.rt b { font: 700 22px Fraunces, Georgia, serif; line-height: 1; }
+.rt small { font-size: 11px; }
+.next {
+  font: 700 26px Fraunces, Georgia, serif;
+  line-height: 1.1;
+  margin: 2px 0 4px;
+}
+.pill {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255,255,255,.18);
+}
+.pill.soon { background: #fde68a; color: #78350f; }
+.pill.over { background: #fecdd3; color: #881337; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.stats div {
+  background: rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 8px 8px;
+  backdrop-filter: blur(4px);
+  text-align: center;
+}
+.stats b { display: block; font-size: 14px; margin-top: 1px; }
+.stats small { font-size: 11px; opacity: .9; }
+
+/* Sleep timer banner */
+.sleep-banner {
+  display: none;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  border-radius: 16px;
+  padding: 12px 14px;
+  align-items: center;
+  gap: 12px;
+  animation: slideUp .3s ease-out;
+  box-shadow: 0 6px 20px rgba(79,70,229,.3);
+}
+.sleep-banner.on { display: flex; }
+.sleep-banner .live {
+  font: 700 22px Fraunces, Georgia, serif;
+  letter-spacing: .5px;
+  min-width: 72px;
+}
+.sleep-banner .stop {
+  margin-left: auto;
+  background: rgba(255,255,255,.2);
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.sleep-banner .stop:active { background: rgba(255,255,255,.3); }
+
+/* Cards */
+.box {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  border: 1px solid var(--line);
+}
+h2 {
+  font: 700 17px Fraunces, Georgia, serif;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+h2 .badge {
+  font: 600 12px system-ui;
+  background: var(--chip);
+  color: var(--mut);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+/* Time chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 99px;
+  background: var(--chip);
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.chip.on {
+  background: var(--btn);
+  color: var(--on);
+  box-shadow: 0 2px 6px rgba(15,118,110,.25);
+}
+/* Custom / exact time — strong obvious accent so it stands out */
+.chip.chip-custom {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1.5px solid #f59e0b;
+  font-weight: 700;
+  padding: 0 12px;
+}
+.chip.chip-custom.on {
+  background: #f59e0b;
+  color: #fff;
+  border-color: #d97706;
+  box-shadow: 0 2px 8px rgba(245,158,11,.4);
+}
+:root[data-theme="dark"] .chip.chip-custom {
+  background: #422006;
+  color: #fcd34d;
+  border-color: #b45309;
+}
+:root[data-theme="dark"] .chip.chip-custom.on {
+  background: #f59e0b;
+  color: #1c1005;
+  border-color: #d97706;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .chip.chip-custom {
+    background: #422006;
+    color: #fcd34d;
+    border-color: #b45309;
+  }
+  :root:not([data-theme="light"]) .chip.chip-custom.on {
+    background: #f59e0b;
+    color: #1c1005;
+    border-color: #d97706;
+  }
+}
+.custom-time-box {
+  display: none;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #fef3c7;
+  border-radius: 14px;
+  gap: 8px;
+  align-items: center;
+  border: 1.5px solid #f59e0b;
+  animation: fadeIn .2s ease-out;
+}
+:root[data-theme="dark"] .custom-time-box {
+  background: #422006;
+  border-color: #b45309;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .custom-time-box {
+    background: #422006;
+    border-color: #b45309;
+  }
+}
+.custom-time-box.on { display: flex; }
+.custom-time-box input[type="datetime-local"] {
+  flex: 1;
+  min-height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid #f59e0b;
+  background: var(--card);
+  color: var(--ink);
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* Activity tiles — always 3 per row */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.tile {
+  min-height: 80px;
+  border-radius: 16px;
+  background: var(--chip);
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  border-bottom: 4px solid var(--c);
+  transition: transform .12s, background .12s, box-shadow .12s;
+  position: relative;
+}
+.tile span { font-size: 24px; line-height: 1; }
+.tile:active { transform: scale(0.96); }
+.tile.sleep-active {
+  background: color-mix(in srgb, var(--slp) 18%, var(--chip));
+  box-shadow: 0 0 0 2px var(--slp);
+}
+.tile .live-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--slp);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--chip);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 14px;
+}
+.tab {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--mut);
+  transition: all .18s;
+}
+.tab.on {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+/* Chart */
+.chart { position: relative; height: 120px; margin-top: 4px; }
+.cols { display: flex; gap: 6px; height: 100%; position: relative; }
+.col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+}
+.col .v { font-size: 11px; color: var(--mut); margin-bottom: 2px; }
+.col .bar {
+  width: 68%;
+  border-radius: 8px 8px 3px 3px;
+  background: var(--milk);
+  opacity: .5;
+  min-height: 4px;
+  transition: height .3s cubic-bezier(0.4,0,0.2,1);
+}
+.col.sel .bar { opacity: 1; }
+.col.sel .v { color: var(--ink); font-weight: 700; }
+.tg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed var(--bad);
+  pointer-events: none;
+}
+.tg small {
+  position: absolute;
+  right: 0;
+  top: -17px;
+  color: var(--bad);
+  font-size: 11px;
+  font-weight: 600;
+}
+.dl {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.dl span {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--mut);
+}
+.det {
+  min-height: 18px;
+  font-size: 13px;
+  margin: 8px 0 0;
+  color: var(--mut);
+}
+
+/* Timeline */
+.zc {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.zc .chip { min-width: 40px; padding: 0 11px; min-height: 36px; font-size: 13px; }
+#zlab { font-size: 12px; color: var(--mut); margin-left: auto; }
+.tl {
+  position: relative;
+  height: 100px;
+  margin: 4px 10px 0;
+  border-bottom: 2px solid var(--line);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tl .lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--line);
+}
+.tl .tk {
+  position: absolute;
+  bottom: -18px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--mut);
+}
+.tl .now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--bad);
+  opacity: .7;
+}
+.tl button { position: absolute; transform: translateX(-50%); }
+.mk {
+  top: 2px;
+  height: 30px;
+  min-width: 24px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background: var(--milk);
+  color: var(--on);
+  font-size: 10px;
+  font-weight: 700;
+}
+.dot {
+  top: 42px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--c);
+}
+.sl {
+  top: 72px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--slp);
+  transform: none !important;
+  opacity: .85;
+}
+.leg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+  color: var(--mut);
+  margin: 22px 0 0;
+}
+
+/* History */
+.day {
+  font-weight: 700;
+  font-size: 13px;
+  margin: 14px 0 4px;
+  color: var(--mut);
+}
+.it {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  animation: fadeIn .2s;
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 0 -6px;
+  padding-left: 6px;
+  padding-right: 6px;
+  transition: background .12s;
+}
+.it:hover, .it:active { background: var(--chip); }
+.ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--chip);
+  font-size: 18px;
+  flex: none;
+}
+.tx { flex: 1; min-width: 0; }
+.tx b { display: block; font-size: 15px; }
+.tx small { color: var(--mut); font-size: 12px; }
+.del {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  color: var(--mut);
+  font-size: 15px;
+  transition: color .12s;
+  flex: none;
+}
+.del:hover { color: var(--bad); }
+.empty {
+  color: var(--mut);
+  padding: 20px 8px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.empty .hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: .85;
+}
+
+/* Sticky bottom bar */
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  padding: 10px 12px calc(10px + var(--safe-bot));
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  z-index: 15;
+  box-shadow: 0 -6px 24px rgba(0,0,0,.06);
+  animation: slideUp .35s ease-out;
+}
+.bottom-bar .main-log {
+  min-height: 52px;
+  border-radius: 14px;
+  background: var(--btn);
+  color: var(--on);
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(15,118,110,.28);
+}
+.bottom-bar .main-log:active { transform: scale(0.97); }
+.bottom-bar .qb {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--chip);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  border: 1px solid var(--line);
+}
+.bottom-bar .qb.sleep-on {
+  background: color-mix(in srgb, var(--slp) 22%, var(--chip));
+  border-color: var(--slp);
+}
+
+/* Sheet / Scrim */
+#scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.48);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s cubic-bezier(0.4,0,0.2,1);
+  z-index: 20;
+  backdrop-filter: blur(3px);
+}
+#scrim.on { opacity: 1; pointer-events: auto; }
+#sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 18px 16px calc(22px + var(--safe-bot));
+  transform: translateY(105%);
+  transition: transform .32s cubic-bezier(0.16,1,0.3,1);
+  z-index: 21;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 -12px 36px rgba(0,0,0,.14);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+#sheet.on { transform: none; }
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--line);
+  margin: 0 auto 4px;
+}
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.big {
+  min-height: 62px;
+  border-radius: 14px;
+  background: var(--chip);
+  font-weight: 700;
+  font-size: 17px;
+  display: grid;
+  place-content: center;
+  line-height: 1.1;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all .12s;
+}
+.big:hover { border-color: var(--btn); }
+.big small { font-size: 11px; font-weight: 500; color: var(--mut); }
+.big.on { background: var(--btn); color: var(--on); }
+.big.on small { color: inherit; opacity: .9; }
+.cu { display: flex; gap: 8px; }
+.cu input {
+  flex: 1;
+  min-width: 0;
+  min-height: 50px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0 14px;
+  font-size: 17px;
+}
+.go {
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: var(--btn);
+  color: var(--on);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(15,118,110,.22);
+}
+.sheet-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.sheet-actions .go { flex: 1; }
+.sheet-actions .ghost {
+  min-height: 50px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: var(--chip);
+  font-weight: 600;
+  color: var(--mut);
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: calc(76px + var(--safe-bot));
+  max-width: 532px;
+  margin: 0 auto;
+  background: #12302f;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 10px 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 50;
+  transform: translateY(160%);
+  transition: transform .28s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 10px 28px rgba(0,0,0,.22);
+}
+#toast.on { transform: none; }
+#toast button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-weight: 700;
+  color: #6ee7b7;
+  border-radius: 10px;
+  background: rgba(255,255,255,.1);
+}
+
+/* Footer links */
+.foot {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+}
+.foot button {
+  min-height: 40px;
+  padding: 0 12px;
+  color: var(--mut);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* Sharing / Wizard extras */
+.code {
+  font: 700 24px Fraunces, Georgia, serif;
+  letter-spacing: 2px;
+  text-align: center;
+  user-select: all;
+  -webkit-user-select: all;
+  background: var(--chip);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+}
+.sp2 { margin: 0; font-size: 14px; color: var(--mut); }
+#wiz {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 40;
+  overflow-y: auto;
+  display: none;
+  padding: calc(14px + var(--safe-top)) 14px calc(20px + var(--safe-bot));
+  animation: fadeIn .2s;
+}
+#wiz.on { display: block; }
+.wz { max-width: 560px; margin: 0 auto; display: grid; gap: 14px; }
+.pbar {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+}
+.pbar i {
+  display: block;
+  height: 100%;
+  background: var(--btn);
+  transition: width .3s cubic-bezier(0.4,0,0.2,1);
+}
+.wz pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--chip);
+  font-size: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+.wz textarea {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 12px;
+  font: 13px monospace;
+}
+.lk {
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+  border-radius: 14px;
+  background: var(--chip);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  transition: background .12s;
+}
+.lk:hover { background: var(--line); }
+
+/* First-run tip */
+.tip-banner {
+  background: color-mix(in srgb, var(--btn) 12%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--btn) 25%, var(--line));
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  display: none;
+  gap: 10px;
+  align-items: flex-start;
+  animation: slideUp .3s ease-out;
+}
+.tip-banner.on { display: flex; }
+.tip-banner button {
+  flex: none;
+  font-size: 18px;
+  color: var(--mut);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.panel { display: none; animation: fadeIn .22s ease-out; }
+.panel.on { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
-  <!-- INTEGRATED APP STORE LOGO -->
-  <div class="logo" aria-label="Cradl Logo">
-    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%230f766e'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M130 260C130 160 210 100 280 100c80 0 130 60 130 140 0 50-20 90-50 120-15 15-40 30-70 35-20 4-45 4-70 0-40-7-70-25-90-50-20-25-30-65-30-95z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><path d='M190 320c20 30 55 50 100 55 35 4 70-5 95-25' fill='none' stroke='%23ffffff' stroke-width='22' stroke-linecap='round'/><circle cx='285' cy='230' r='36' fill='%23ffffff'/><path d='M225 245c15 15 35 25 60 25' fill='none' stroke='%230f766e' stroke-width='14' stroke-linecap='round'/></svg>" alt="Cradl Logo" onerror="this.src='https://placehold.co/100x100/0f766e/ffffff?text=C'">
+  <header>
+    <div class="logo" aria-label="Cradl Logo">
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%230f766e'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M130 260C130 160 210 100 280 100c80 0 130 60 130 140 0 50-20 90-50 120-15 15-40 30-70 35-20 4-45 4-70 0-40-7-70-25-90-50-20-25-30-65-30-95z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><path d='M190 320c20 30 55 50 100 55 35 4 70-5 95-25' fill='none' stroke='%23ffffff' stroke-width='22' stroke-linecap='round'/><circle cx='285' cy='230' r='36' fill='%23ffffff'/><path d='M225 245c15 15 35 25 60 25' fill='none' stroke='%230f766e' stroke-width='14' stroke-linecap='round'/></svg>" alt="Cradl" onerror="this.src='https://placehold.co/100x100/0f766e/ffffff?text=C'">
+    </div>
+    <div>
+      <b>Cradl</b>
+      <small id="sub">Fast baby logging</small>
+    </div>
+    <div class="sp"></div>
+    <button class="ib" id="share" aria-label="Share with partner">👥</button>
+    <button class="ib" id="bell" aria-label="Feed reminders" aria-pressed="false">🔕</button>
+    <button class="ib" id="theme" aria-label="Switch light or dark mode">🌓</button>
+  </header>
+
+  <!-- First-run tip -->
+  <div class="tip-banner" id="tipBanner">
+    <div>
+      <strong>Quick tip:</strong> Use the big green button below to log a feed in one tap. The amount remembers what you used last.
+    </div>
+    <button id="tipClose" aria-label="Dismiss tip">✕</button>
   </div>
-  <div><b>Cradl</b><small id="sub">Fast baby logging</small></div>
-  <div class="sp"></div>
-  <button class="ib" id="share" aria-label="Share with partner">👥</button>
-  <button class="ib" id="bell" aria-label="Feed reminders" aria-pressed="false">🔕</button>
-  <button class="ib" id="theme" aria-label="Switch light or dark mode">🌓</button>
-</header>
 
-<section class="hero" aria-label="Next feed">
-  <div class="hr"><div class="clock" id="clock">--</div><small id="date"></small></div>
-  <div class="hm">
-    <div class="ring" id="tgt" role="button" tabindex="0" aria-label="Change daily target"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="r0" cx="40" cy="40" r="34"/><circle class="r1" id="arc" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" transform="rotate(-90 40 40)"/></svg>
-      <div class="rt"><b id="ml">0</b><small id="tgl">of 600 mL ✎</small></div></div>
-    <div><small>Next feed, 3 hours after the last</small><div class="next" id="next">--</div><span class="pill" id="cd">…</span></div>
+  <!-- Hero -->
+  <section class="hero" aria-label="Next feed">
+    <div class="hr">
+      <div class="clock" id="clock">--</div>
+      <small id="date"></small>
+    </div>
+    <div class="hm">
+      <div class="ring" id="tgt" role="button" tabindex="0" aria-label="Change daily target">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <circle class="r0" cx="40" cy="40" r="34"/>
+          <circle class="r1" id="arc" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" transform="rotate(-90 40 40)"/>
+        </svg>
+        <div class="rt">
+          <b id="ml">0</b>
+          <small id="tgl">of 600 mL ✎</small>
+        </div>
+      </div>
+      <div>
+        <small>Next feed · 3h after last</small>
+        <div class="next" id="next">--</div>
+        <span class="pill" id="cd">…</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div><small>Last feed</small><b id="sFeed">--</b></div>
+      <div><small>Last diaper</small><b id="sDia">--</b></div>
+      <div><small>Sleep today</small><b id="sSlp">--</b></div>
+    </div>
+  </section>
+
+  <!-- Live sleep timer -->
+  <div class="sleep-banner" id="sleepBanner">
+    <div>
+      <small style="opacity:.85">Sleeping</small>
+      <div class="live" id="sleepLive">0:00</div>
+    </div>
+    <button class="stop" id="sleepStop">Stop &amp; log</button>
   </div>
-  <button class="quick" id="quick">Log feed</button>
-  <div class="stats">
-    <div><small>Last feed</small><b id="sFeed">--</b></div>
-    <div><small>Last diaper</small><b id="sDia">--</b></div>
-    <div><small>Sleep today</small><b id="sSlp">--</b></div>
+
+  <!-- Log section -->
+  <section class="box">
+    <h2>Log something</h2>
+    <div class="mut" style="margin-bottom:6px;font-size:13px">When did it happen?</div>
+    <div class="chips" id="chips"></div>
+    <div class="custom-time-box" id="ctimeBox">
+      <input type="datetime-local" id="customDt" aria-label="Custom event date and time">
+      <button class="chip" id="cNowBtn" style="min-height:38px;padding:0 12px;font-size:13px">Now</button>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <!-- Tabs for secondary views -->
+  <section class="box">
+    <div class="tabs" role="tablist">
+      <button class="tab on" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+      <button class="tab" role="tab" data-tab="history" aria-selected="false">History</button>
+    </div>
+
+    <div class="panel on" id="panel-overview">
+      <h2 style="margin-top:0">Last 7 days</h2>
+      <div class="chart">
+        <div class="cols" id="cols"></div>
+        <div class="tg" id="tg"><small id="tgs">600 mL</small></div>
+      </div>
+      <div class="dl" id="dl"></div>
+      <p class="det" id="det">Tap a bar to see that day.</p>
+
+      <h2 style="margin-top:18px">Today’s 24 hours</h2>
+      <div class="zc">
+        <button class="chip" id="zout" aria-label="Zoom out">−</button>
+        <button class="chip" id="zin" aria-label="Zoom in">+</button>
+        <button class="chip" id="znow">Around now</button>
+        <button class="chip" id="zall">Full day</button>
+        <span id="zlab"></span>
+      </div>
+      <div class="tl" id="tl"></div>
+      <div class="leg">
+        <span>🟩 Milk</span>
+        <span>🟨 Pee</span>
+        <span>🟫 Poo</span>
+        <span>🔷 Bath</span>
+        <span>🟣 Vit D</span>
+        <span>🟦 Sleep</span>
+      </div>
+      <p class="det" id="tip">Tap a marker for details. Pinch or double-tap to zoom.</p>
+    </div>
+
+    <div class="panel" id="panel-history">
+      <div id="log"></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <button id="testn">Test reminder</button>
+    <button id="copy">Copy as CSV</button>
+    <button id="reset">Reset sample data</button>
   </div>
-</section>
+</div>
 
-<section class="box">
-  <h2>Log something</h2>
-  <div class="mut" style="margin-bottom:6px">When did it happen?</div>
-  <div class="chips" id="chips"></div>
-  <div class="custom-time-box" id="ctimeBox">
-    <input type="datetime-local" id="customDt" aria-label="Custom event date and time">
-    <button class="chip" id="cNowBtn" style="min-height:40px;padding:0 12px;font-size:13px">Reset to Now</button>
-  </div>
-  <div class="tiles" id="tiles"></div>
-</section>
-
-<section class="box">
-  <h2>Last 7 days</h2>
-  <div class="chart"><div class="cols" id="cols"></div><div class="tg" id="tg"><small id="tgs">600 mL</small></div></div>
-  <div class="dl" id="dl"></div>
-  <p class="det" id="det">Tap a bar to see that day.</p>
-</section>
-
-<section class="box">
-  <h2>Today’s 24 hours</h2>
-  <div class="zc"><button class="chip" id="zout" aria-label="Zoom out">−</button><button class="chip" id="zin" aria-label="Zoom in">+</button><button class="chip" id="znow">Around now</button><button class="chip" id="zall">Full day</button><span id="zlab"></span></div>
-  <div class="tl" id="tl"></div>
-  <div class="leg"><span>🟩 Milk</span><span>🟨 Pee</span><span>🟫 Poo</span><span>🔷 Bath</span><span>🟣 Vitamin D</span><span>🟦 Sleep</span></div>
-  <p class="det" id="tip">Tap a marker for details. Pinch or double-tap to zoom, drag to move.</p>
-</section>
-
-<section class="box">
-  <h2>History</h2>
-  <div id="log"></div>
-</section>
-
-<div class="foot"><button id="testn">Test reminder</button><button id="copy">Copy as CSV</button><button id="reset">Reset sample data</button></div>
+<!-- Sticky bottom action bar -->
+<div class="bottom-bar" role="toolbar" aria-label="Quick log">
+  <button class="main-log" id="quick">
+    <span>🍼</span>
+    <span id="quickLabel">Log 150 mL</span>
+  </button>
+  <button class="qb" id="qbPee" aria-label="Log pee">💧</button>
+  <button class="qb" id="qbPoo" aria-label="Log poo">💩</button>
+  <button class="qb" id="qbSleep" aria-label="Start or stop sleep">🌙</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <div id="wiz" role="dialog" aria-modal="true"></div>
 <div id="scrim"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
-<div id="toast" role="status"><span id="tmsg"></span><button id="tundo">Undo</button></div>
+<div id="toast" role="status">
+  <span id="tmsg"></span>
+  <button id="tundo">Undo</button>
+</div>
 
 <script>
-var K='cradl_v2',TARGET=600,GAP=3*36e5,H=36e5,DAY=864e5;
-var FIREBASE_CONFIG={apiKey:'YOUR_API_KEY',authDomain:'YOUR_PROJECT.firebaseapp.com',projectId:'YOUR_PROJECT',appId:'YOUR_APP_ID'};
-var E=[],off=0,customTs=null,selDay=-1,undoFn=null,tT;
-var $=function(i){return document.getElementById(i)};
-var META={MILK:['🍼','Milk','--milk'],PEE:['💧','Pee','--pee'],POO:['💩','Poo','--poo'],BATH:['🛁','Bath','--bath'],SLEEP:['🌙','Sleep','--slp'],VITD:['☀️','Vitamin D','--vit']};
-var TILES=['MILK','PEE','POO','SLEEP','BATH','VITD'];
-var OFFS=[[0,'Now'],[5,'5m ago'],[15,'15m ago'],[30,'30m ago'],[60,'1h ago'],['custom','🕒 Pick exact time']];
+var K = 'cradl_v3', TARGET = 600, GAP = 3 * 36e5, H = 36e5, DAY = 864e5;
+var FIREBASE_CONFIG = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_PROJECT.firebaseapp.com',
+  projectId: 'YOUR_PROJECT',
+  appId: 'YOUR_APP_ID'
+};
+var E = [], off = 0, customTs = null, selDay = -1, undoFn = null, tT;
+var sleepStart = null; // timestamp when sleep started (live timer)
+var editId = null;     // id being edited
 
-function sod(t){var d=new Date(t);return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()}
-function dayStart(n){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate()-n).getTime()}
-function fT(t){return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}
-function dur(m){var h=Math.floor(m/60),r=m%60;return h?(r?h+'h '+r+'m':h+'h'):m+'m'}
-function ago(ms){var m=Math.floor(ms/6e4);if(m<1)return 'just now';if(m<60)return m+'m ago';return Math.floor(m/60)+'h '+(m%60)+'m ago'}
-function save(){try{localStorage.setItem(K,JSON.stringify(E))}catch(e){}}
-function load(){try{var r=localStorage.getItem(K);if(r){var a=JSON.parse(r);if(Array.isArray(a))return a}}catch(e){}return null}
-function sort(){E.sort(function(a,b){return b.t-a.t})}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+var $ = function(i) { return document.getElementById(i); };
+var META = {
+  MILK: ['🍼', 'Milk', '--milk'],
+  PEE:  ['💧', 'Pee',  '--pee'],
+  POO:  ['💩', 'Poo',  '--poo'],
+  BATH: ['🛁', 'Bath', '--bath'],
+  SLEEP:['🌙', 'Sleep','--slp'],
+  VITD: ['☀️', 'Vitamin D', '--vit']
+};
+var TILES = ['MILK', 'PEE', 'POO', 'SLEEP', 'BATH', 'VITD'];
+var OFFS = [
+  [0, 'Now'],
+  [5, '5m ago'],
+  [15, '15m ago'],
+  [30, '30m ago'],
+  [60, '1h ago'],
+  ['custom', '🕒 Exact']
+];
 
-function sample(){
-  var n=Date.now(),a=[],i,d,s;
-  function p(t,c,x){var o={id:uid(),t:t,c:c,s:1};for(var k in x)o[k]=x[k];a.push(o)}
-  for(d=1;d<=6;d++){s=dayStart(d);
-    [[7,150],[10,120],[13,150],[16,120],[19,60]].forEach(function(f){p(s+f[0]*H+d*6e4,'MILK',{v:f[1]})});
-    p(s+9*H,'PEE',{i:'++'});p(s+14*H,'POO',{i:'++'});p(s+18*H,'BATH',{});p(s+8*H,'VITD',{});p(s+11*H,'SLEEP',{d:60})}
-  p(n-0.4*H,'MILK',{v:150});p(n-3.4*H,'MILK',{v:150});p(n-6.4*H,'MILK',{v:120});
-  p(n-1.2*H,'PEE',{i:'++'});p(n-2.6*H,'POO',{i:'+'});p(n-4.5*H,'VITD',{});p(n-5*H,'BATH',{});p(n-2*H,'SLEEP',{d:45});
-  return a}
+// Remembered defaults
+var lastVol = 150, lastPee = '++', lastPoo = '++';
 
-function lastVol(){for(var i=0;i<E.length;i++)if(E[i].c==='MILK')return E[i].v;return 150}
-function getEventTimestamp(){
-  if(off==='custom' && customTs){return customTs}
-  return Date.now()- (+off)*6e4;
+function sod(t) {
+  var d = new Date(t);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
-function add(c,x,msg){
+function dayStart(n) {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - n).getTime();
+}
+function fT(t) {
+  return new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+function dur(m) {
+  var h = Math.floor(m / 60), r = m % 60;
+  return h ? (r ? h + 'h ' + r + 'm' : h + 'h') : m + 'm';
+}
+function ago(ms) {
+  var m = Math.floor(ms / 6e4);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  return Math.floor(m / 60) + 'h ' + (m % 60) + 'm ago';
+}
+function save() {
+  try {
+    localStorage.setItem(K, JSON.stringify({
+      entries: E,
+      lastVol: lastVol,
+      lastPee: lastPee,
+      lastPoo: lastPoo,
+      sleepStart: sleepStart
+    }));
+  } catch (e) {}
+}
+function load() {
+  try {
+    var r = localStorage.getItem(K);
+    if (r) {
+      var a = JSON.parse(r);
+      if (Array.isArray(a)) return { entries: a }; // migrate v2
+      if (a && Array.isArray(a.entries)) return a;
+    }
+  } catch (e) {}
+  return null;
+}
+function sort() { E.sort(function(a, b) { return b.t - a.t; }); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function sample() {
+  var n = Date.now(), a = [], i, d, s;
+  function p(t, c, x) {
+    var o = { id: uid(), t: t, c: c, s: 1 };
+    for (var k in x) o[k] = x[k];
+    a.push(o);
+  }
+  for (d = 1; d <= 6; d++) {
+    s = dayStart(d);
+    [[7, 150], [10, 120], [13, 150], [16, 120], [19, 60]].forEach(function(f) {
+      p(s + f[0] * H + d * 6e4, 'MILK', { v: f[1] });
+    });
+    p(s + 9 * H, 'PEE', { i: '++' });
+    p(s + 14 * H, 'POO', { i: '++' });
+    p(s + 18 * H, 'BATH', {});
+    p(s + 8 * H, 'VITD', {});
+    p(s + 11 * H, 'SLEEP', { d: 60 });
+  }
+  p(n - 0.4 * H, 'MILK', { v: 150 });
+  p(n - 3.4 * H, 'MILK', { v: 150 });
+  p(n - 6.4 * H, 'MILK', { v: 120 });
+  p(n - 1.2 * H, 'PEE', { i: '++' });
+  p(n - 2.6 * H, 'POO', { i: '+' });
+  p(n - 4.5 * H, 'VITD', {});
+  p(n - 5 * H, 'BATH', {});
+  p(n - 2 * H, 'SLEEP', { d: 45 });
+  return a;
+}
+
+function getLastVol() {
+  for (var i = 0; i < E.length; i++) if (E[i].c === 'MILK') return E[i].v;
+  return lastVol || 150;
+}
+function getEventTimestamp() {
+  if (off === 'custom' && customTs) return customTs;
+  return Date.now() - (+off) * 6e4;
+}
+
+function add(c, x, msg) {
   var t = getEventTimestamp();
-  var o={id:uid(),t:t,c:c};for(var k in x)o[k]=x[k];
-  put(o);off=0;customTs=null;render();
-  toast(msg,function(){rm(o.id)})}
-function toast(m,fn){$('tmsg').textContent=m;undoFn=fn;$('tundo').style.display=fn?'':'none';$('toast').classList.add('on');clearTimeout(tT);tT=setTimeout(function(){$('toast').classList.remove('on')},5000)}
-$('tundo').onclick=function(){if(undoFn)undoFn();undoFn=null;$('toast').classList.remove('on')};
+  var o = { id: uid(), t: t, c: c };
+  for (var k in x) o[k] = x[k];
+  if (c === 'MILK' && o.v) lastVol = o.v;
+  if (c === 'PEE' && o.i) lastPee = o.i;
+  if (c === 'POO' && o.i) lastPoo = o.i;
+  put(o);
+  off = 0;
+  customTs = null;
+  editId = null;
+  render();
+  toast(msg, function() { rm(o.id); });
+}
 
-function title(e){
-  if(e.c==='MILK')return e.v+' mL milk';
-  if(e.c==='PEE')return 'Pee '+e.i;
-  if(e.c==='POO')return 'Poo '+e.i;
-  if(e.c==='SLEEP')return 'Sleep '+dur(e.d);
-  return META[e.c][1]}
+function updateEntry(id, changes, msg) {
+  var o = E.filter(function(e) { return e.id === id; })[0];
+  if (!o) return;
+  var old = JSON.parse(JSON.stringify(o));
+  for (var k in changes) o[k] = changes[k];
+  if (o.c === 'MILK' && o.v) lastVol = o.v;
+  if (useCloud) {
+    col().doc(id).set(o).catch(fail);
+  } else {
+    save();
+  }
+  sort();
+  editId = null;
+  render();
+  toast(msg || 'Updated', function() {
+    for (var k in old) o[k] = old[k];
+    if (useCloud) col().doc(id).set(o).catch(fail);
+    else save();
+    render();
+  });
+}
 
-/* ---------- sheet ---------- */
-function openSheet(k){
-  var h='<h2 style="margin:0">'+META[k][0]+' '+META[k][1]+(off?' · '+off+'m ago':'')+'</h2>';
-  if(k==='MILK'){
-    h+='<div class="g4">'+[120,150,180,210].map(function(v){return '<button class="big" data-a="milk" data-v="'+v+'">'+v+'<small>mL</small></button>'}).join('')+'</div>'+
-    '<div class="cu"><input id="cin" type="number" inputmode="numeric" min="5" max="500" placeholder="Other amount, mL" aria-label="Other amount in mL"><button class="go" data-a="milkC">Save</button></div>'}
-  else if(k==='PEE'||k==='POO'){
-    var L=k==='PEE'?['Light','Medium','Heavy']:['Small','Medium','Large'];
-    h+='<div class="g3">'+['+','++','+++'].map(function(s,i){return '<button class="big" data-a="dia" data-k="'+k+'" data-v="'+s+'">'+s+'<small>'+L[i]+'</small></button>'}).join('')+'</div>'}
-  else if(k==='SLEEP'){
-    h+='<div class="g4">'+[[30,'30m'],[45,'45m'],[60,'1h'],[90,'1h 30m']].map(function(v){return '<button class="big" data-a="slp" data-v="'+v[0]+'">'+v[1]+'</button>'}).join('')+'</div>'+
-    '<div class="cu"><input id="cin" type="number" inputmode="numeric" min="5" max="720" placeholder="Other length, minutes" aria-label="Other length in minutes"><button class="go" data-a="slpC">Save</button></div>'}
-  $('sheet').innerHTML=h;$('sheet').classList.add('on');$('scrim').classList.add('on')}
-function closeSheet(){$('sheet').classList.remove('on');$('scrim').classList.remove('on')}
-$('scrim').onclick=closeSheet;
-$('sheet').onclick=function(e){
-  var b=e.target.closest('[data-a]');if(!b)return;var a=b.dataset.a,v=+b.dataset.v,inp=$('cin'),n=inp?parseFloat(inp.value):0;
-  if(a==='milk'){closeSheet();add('MILK',{v:v},'Logged '+v+' mL milk')}
-  else if(a==='milkC'){if(n>=5&&n<=500){closeSheet();add('MILK',{v:Math.round(n)},'Logged '+Math.round(n)+' mL milk')}else inp.focus()}
-  else if(a==='dia'){closeSheet();add(b.dataset.k,{i:b.dataset.v},'Logged '+META[b.dataset.k][1].toLowerCase()+' '+b.dataset.v)}
-  else if(a==='slp'){closeSheet();add('SLEEP',{d:v},'Logged '+dur(v)+' sleep')}
-  else if(a==='slpC'){if(n>=5&&n<=720){closeSheet();add('SLEEP',{d:Math.round(n)},'Logged '+dur(Math.round(n))+' sleep')}else inp.focus()}
-  else if(a==='tgt'){setTarget(v)}
-  else if(a==='tgtC'){if(n>=50&&n<=3000)setTarget(Math.round(n));else inp.focus()}
-  else if(a==='fcreate'){createFam()}
-  else if(a==='fjoin'){var cd=norm(inp?inp.value:'');if(cd)joinFam(cd);else{toast('A code has 12 letters and numbers.',null);if(inp)inp.focus()}}
-  else if(a==='fcopy'){copyTxt(fam,'Code copied')}
-  else if(a==='flink'){invite()}
-  else if(a==='wiz'){openWiz()}
-  else if(a==='paste'){pasteInvite(inp?inp.value:'')}
-  else if(a==='fleave'){if(confirm('Stop sharing on this phone? The shared log stays online for your partner.'))leaveFam()}}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
+function toast(m, fn) {
+  $('tmsg').textContent = m;
+  undoFn = fn;
+  $('tundo').style.display = fn ? '' : 'none';
+  $('toast').classList.add('on');
+  clearTimeout(tT);
+  tT = setTimeout(function() { $('toast').classList.remove('on'); }, 4500);
+}
+$('tundo').onclick = function() {
+  if (undoFn) undoFn();
+  undoFn = null;
+  $('toast').classList.remove('on');
+};
 
-/* ---------- static UI ---------- */
-function renderChips(){
-  $('chips').innerHTML=OFFS.map(function(o){
+function title(e) {
+  if (e.c === 'MILK') return e.v + ' mL milk';
+  if (e.c === 'PEE') return 'Pee ' + e.i;
+  if (e.c === 'POO') return 'Poo ' + e.i;
+  if (e.c === 'SLEEP') return 'Sleep ' + dur(e.d);
+  return META[e.c][1];
+}
+
+/* ---------- Sheet ---------- */
+function openSheet(k, prefill) {
+  editId = prefill ? prefill.id : null;
+  var h = '<div class="sheet-handle"></div>';
+  h += '<h2 style="margin:0">' + META[k][0] + ' ' + META[k][1];
+  if (editId) h += ' · Edit';
+  else if (off && off !== 'custom') h += ' · ' + off + 'm ago';
+  else if (off === 'custom') h += ' · custom time';
+  h += '</h2>';
+
+  if (k === 'MILK') {
+    var cur = prefill ? prefill.v : lastVol;
+    h += '<div class="g4">' + [120, 150, 180, 210].map(function(v) {
+      return '<button class="big' + (v === cur ? ' on' : '') + '" data-a="milk" data-v="' + v + '">' + v + '<small>mL</small></button>';
+    }).join('') + '</div>';
+    h += '<div class="cu"><input id="cin" type="number" inputmode="numeric" min="5" max="500" placeholder="Other amount, mL" value="' + (prefill && ![120,150,180,210].includes(prefill.v) ? prefill.v : '') + '" aria-label="Other amount in mL"><button class="go" data-a="milkC">Save</button></div>';
+  } else if (k === 'PEE' || k === 'POO') {
+    var L = k === 'PEE' ? ['Light', 'Medium', 'Heavy'] : ['Small', 'Medium', 'Large'];
+    var curI = prefill ? prefill.i : (k === 'PEE' ? lastPee : lastPoo);
+    h += '<div class="g3">' + ['+', '++', '+++'].map(function(s, i) {
+      return '<button class="big' + (s === curI ? ' on' : '') + '" data-a="dia" data-k="' + k + '" data-v="' + s + '">' + s + '<small>' + L[i] + '</small></button>';
+    }).join('') + '</div>';
+  } else if (k === 'SLEEP') {
+    if (sleepStart && !prefill) {
+      // Should not reach here; stop is handled separately
+    }
+    var curD = prefill ? prefill.d : 45;
+    h += '<div class="g4">' + [[30, '30m'], [45, '45m'], [60, '1h'], [90, '1h 30m']].map(function(v) {
+      return '<button class="big' + (v[0] === curD ? ' on' : '') + '" data-a="slp" data-v="' + v[0] + '">' + v[1] + '</button>';
+    }).join('') + '</div>';
+    h += '<div class="cu"><input id="cin" type="number" inputmode="numeric" min="5" max="720" placeholder="Other length, minutes" value="' + (prefill && ![30,45,60,90].includes(prefill.d) ? prefill.d : '') + '" aria-label="Other length in minutes"><button class="go" data-a="slpC">Save</button></div>';
+  }
+
+  if (editId) {
+    h += '<div class="sheet-actions"><button class="go" data-a="saveEdit" style="display:none">Save changes</button><button class="ghost" data-a="cancelEdit">Cancel</button></div>';
+  }
+
+  $('sheet').innerHTML = h;
+  $('sheet').classList.add('on');
+  $('scrim').classList.add('on');
+}
+
+function closeSheet() {
+  $('sheet').classList.remove('on');
+  $('scrim').classList.remove('on');
+  editId = null;
+}
+$('scrim').onclick = closeSheet;
+
+$('sheet').onclick = function(e) {
+  var b = e.target.closest('[data-a]');
+  if (!b) return;
+  var a = b.dataset.a, v = +b.dataset.v, inp = $('cin'), n = inp ? parseFloat(inp.value) : 0;
+
+  if (a === 'milk') {
+    if (editId) {
+      updateEntry(editId, { v: v, t: getEventTimestamp() }, 'Updated to ' + v + ' mL');
+      closeSheet();
+    } else {
+      closeSheet();
+      add('MILK', { v: v }, 'Logged ' + v + ' mL milk');
+    }
+  } else if (a === 'milkC') {
+    if (n >= 5 && n <= 500) {
+      if (editId) {
+        updateEntry(editId, { v: Math.round(n), t: getEventTimestamp() }, 'Updated to ' + Math.round(n) + ' mL');
+        closeSheet();
+      } else {
+        closeSheet();
+        add('MILK', { v: Math.round(n) }, 'Logged ' + Math.round(n) + ' mL milk');
+      }
+    } else if (inp) inp.focus();
+  } else if (a === 'dia') {
+    if (editId) {
+      updateEntry(editId, { i: b.dataset.v, t: getEventTimestamp() }, 'Updated');
+      closeSheet();
+    } else {
+      closeSheet();
+      add(b.dataset.k, { i: b.dataset.v }, 'Logged ' + META[b.dataset.k][1].toLowerCase() + ' ' + b.dataset.v);
+    }
+  } else if (a === 'slp') {
+    if (editId) {
+      updateEntry(editId, { d: v, t: getEventTimestamp() }, 'Updated sleep');
+      closeSheet();
+    } else {
+      closeSheet();
+      add('SLEEP', { d: v }, 'Logged ' + dur(v) + ' sleep');
+    }
+  } else if (a === 'slpC') {
+    if (n >= 5 && n <= 720) {
+      if (editId) {
+        updateEntry(editId, { d: Math.round(n), t: getEventTimestamp() }, 'Updated sleep');
+        closeSheet();
+      } else {
+        closeSheet();
+        add('SLEEP', { d: Math.round(n) }, 'Logged ' + dur(Math.round(n)) + ' sleep');
+      }
+    } else if (inp) inp.focus();
+  } else if (a === 'tgt') {
+    setTarget(v);
+  } else if (a === 'tgtC') {
+    if (n >= 50 && n <= 3000) setTarget(Math.round(n));
+    else if (inp) inp.focus();
+  } else if (a === 'fcreate') { createFam(); }
+  else if (a === 'fjoin') {
+    var cd = norm(inp ? inp.value : '');
+    if (cd) joinFam(cd);
+    else { toast('A code has 12 letters and numbers.', null); if (inp) inp.focus(); }
+  } else if (a === 'fcopy') { copyTxt(fam, 'Code copied'); }
+  else if (a === 'flink') { invite(); }
+  else if (a === 'wiz') { openWiz(); }
+  else if (a === 'paste') { pasteInvite(inp ? inp.value : ''); }
+  else if (a === 'fleave') {
+    if (confirm('Stop sharing on this phone? The shared log stays online for your partner.')) leaveFam();
+  } else if (a === 'cancelEdit') { closeSheet(); }
+};
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeSheet();
+});
+
+/* ---------- Static UI ---------- */
+function renderChips() {
+  $('chips').innerHTML = OFFS.map(function(o) {
     var isSel = (off === o[0]);
-    return '<button class="chip'+(isSel?' on':'')+'" data-o="'+o[0]+'">'+o[1]+'</button>';
+    var isCustomChip = (o[0] === 'custom');
+    return '<button class="chip' + (isCustomChip ? ' chip-custom' : '') + (isSel ? ' on' : '') + '" data-o="' + o[0] + '">' + o[1] + '</button>';
   }).join('');
   var isCustom = (off === 'custom');
   $('ctimeBox').classList.toggle('on', isCustom);
-  if(isCustom && !$('customDt').value){
+  if (isCustom && !$('customDt').value) {
     var now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    $('customDt').value = now.toISOString().slice(0,16);
+    $('customDt').value = now.toISOString().slice(0, 16);
     customTs = new Date($('customDt').value).getTime();
   }
 }
 
-$('chips').onclick=function(e){
-  var b=e.target.closest('[data-o]');if(!b)return;
+$('chips').onclick = function(e) {
+  var b = e.target.closest('[data-o]');
+  if (!b) return;
   var val = b.dataset.o;
   off = (val === 'custom') ? 'custom' : +val;
-  if(off !== 'custom') customTs = null;
+  if (off !== 'custom') customTs = null;
   renderChips();
+  updateQuickLabel();
 };
 
-$('customDt').onchange=function(){
-  if($('customDt').value){
-    customTs = new Date($('customDt').value).getTime();
-  }
+$('customDt').onchange = function() {
+  if ($('customDt').value) customTs = new Date($('customDt').value).getTime();
 };
 
-$('cNowBtn').onclick=function(){
+$('cNowBtn').onclick = function() {
   off = 0;
   customTs = null;
   renderChips();
+  updateQuickLabel();
 };
 
-$('tiles').innerHTML=TILES.map(function(k){return '<button class="tile" data-k="'+k+'" style="--c:var('+META[k][2]+')"><span>'+META[k][0]+'</span>'+META[k][1]+'</button>'}).join('');
-$('tiles').onclick=function(e){var b=e.target.closest('[data-k]');if(!b)return;var k=b.dataset.k;
-  if(k==='BATH')add('BATH',{},'Logged bath');else if(k==='VITD')add('VITD',{},'Logged vitamin D');else openSheet(k)};
-$('quick').onclick=function(){var v=lastVol();add('MILK',{v:v},'Logged '+v+' mL milk')};
+function renderTiles() {
+  $('tiles').innerHTML = TILES.map(function(k) {
+    var extra = '';
+    if (k === 'SLEEP' && sleepStart) extra = ' sleep-active';
+    var dot = (k === 'SLEEP' && sleepStart) ? '<span class="live-dot"></span>' : '';
+    return '<button class="tile' + extra + '" data-k="' + k + '" style="--c:var(' + META[k][2] + ')"><span>' + META[k][0] + '</span>' + META[k][1] + dot + '</button>';
+  }).join('');
+}
+$('tiles').onclick = function(e) {
+  var b = e.target.closest('[data-k]');
+  if (!b) return;
+  var k = b.dataset.k;
+  if (k === 'BATH') add('BATH', {}, 'Logged bath');
+  else if (k === 'VITD') add('VITD', {}, 'Logged vitamin D');
+  else if (k === 'SLEEP') {
+    if (sleepStart) stopSleep();
+    else startSleep();
+  } else openSheet(k);
+};
 
-/* ---------- render ---------- */
-function hero(){
-  var n=new Date(),now=n.getTime(),s0=sod(now),ml=0,lf=null,ld=null,sl=0,i,e;
-  $('clock').textContent=n.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit'});
-  $('date').textContent=n.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
-  for(i=0;i<E.length;i++){e=E[i];
-    if(e.c==='MILK'&&!lf&&e.t<=now)lf=e;
-    if((e.c==='PEE'||e.c==='POO')&&!ld&&e.t<=now)ld=e;
-    if(e.t>=s0&&e.t<s0+DAY){if(e.c==='MILK')ml+=e.v;if(e.c==='SLEEP')sl+=e.d}}
-  $('ml').textContent=Math.round(ml);$('tgl').textContent='of '+TARGET+' mL ✎';
-  $('arc').style.strokeDashoffset=213.6*(1-Math.min(ml/TARGET,1));
-  var cd=$('cd');
-  if(lf){var due=lf.t+GAP,df=due-now,m=Math.round(Math.abs(df)/6e4);
-    $('next').textContent=fT(due);
-    cd.className='pill'+(df<=0?' over':df<=30*6e4?' soon':'');
-    cd.textContent=df>0?'In '+(m>=60?Math.floor(m/60)+'h ':'')+(m%60)+'m':'Due now · '+m+'m ago';
-    $('sFeed').textContent=ago(now-lf.t);remind(lf,due,now)}
-  else{$('next').textContent='--';cd.className='pill';cd.textContent='No feeds yet';$('sFeed').textContent='--'}
-  $('sDia').textContent=ld?ago(now-ld.t):'--';
-  $('sSlp').textContent=sl?dur(sl):'0m';
-  var timeLabel = off === 'custom' ? 'at custom time' : (off ? off + 'm ago' : 'now');
-  $('quick').textContent='Log '+lastVol()+' mL '+timeLabel}
+/* ---------- Sleep timer ---------- */
+function startSleep() {
+  sleepStart = Date.now();
+  save();
+  updateSleepUI();
+  toast('Sleep started — tap Stop when done', null);
+}
+function stopSleep() {
+  if (!sleepStart) return;
+  var mins = Math.max(1, Math.round((Date.now() - sleepStart) / 6e4));
+  sleepStart = null;
+  save();
+  updateSleepUI();
+  add('SLEEP', { d: mins }, 'Logged ' + dur(mins) + ' sleep');
+}
+function updateSleepUI() {
+  var on = !!sleepStart;
+  $('sleepBanner').classList.toggle('on', on);
+  $('qbSleep').classList.toggle('sleep-on', on);
+  renderTiles();
+  if (on) tickSleep();
+}
+function tickSleep() {
+  if (!sleepStart) return;
+  var sec = Math.floor((Date.now() - sleepStart) / 1000);
+  var m = Math.floor(sec / 60), s = sec % 60;
+  $('sleepLive').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+}
+$('sleepStop').onclick = stopSleep;
 
-function chart(){
-  var ds=[],i,max=TARGET*1.1;
-  for(i=6;i>=0;i--){var d=new Date(),a=new Date(d.getFullYear(),d.getMonth(),d.getDate()-i),b=new Date(d.getFullYear(),d.getMonth(),d.getDate()-i+1),t=0,c=0;
-    E.forEach(function(e){if(e.c==='MILK'&&e.t>=a.getTime()&&e.t<b.getTime()){t+=e.v;c++}});
-    ds.push({l:i?a.toLocaleDateString([],{weekday:'short'}):'Today',t:t,c:c});max=Math.max(max,t)}
-  $('cols').innerHTML=ds.map(function(d,i){return '<button class="col'+(selDay===i?' sel':'')+'" data-d="'+i+'" aria-label="'+d.l+': '+d.t+' mL"><span class="v">'+(d.t||'')+'</span><span class="bar" style="height:'+(d.t/max*100*0.82)+'%"></span></button>'}).join('');
-  $('dl').innerHTML=ds.map(function(d){return '<span>'+d.l+'</span>'}).join('');
-  $('tgs').textContent=TARGET+' mL';$('tg').style.bottom=(TARGET/max*100*0.82)+'%';
-  $('cols').onclick=function(e){var b=e.target.closest('[data-d]');if(!b)return;selDay=+b.dataset.d;var d=ds[selDay];
-    $('det').textContent=d.l+': '+d.t+' mL in '+d.c+(d.c===1?' feed':' feeds');chart()}}
+/* ---------- Quick bottom bar ---------- */
+function updateQuickLabel() {
+  var v = getLastVol();
+  var timeLabel = off === 'custom' ? 'custom' : (off ? off + 'm ago' : '');
+  $('quickLabel').textContent = 'Log ' + v + ' mL' + (timeLabel ? ' · ' + timeLabel : '');
+}
+$('quick').onclick = function() {
+  var v = getLastVol();
+  add('MILK', { v: v }, 'Logged ' + v + ' mL milk');
+};
+$('qbPee').onclick = function() {
+  add('PEE', { i: lastPee }, 'Logged pee ' + lastPee);
+};
+$('qbPoo').onclick = function() {
+  add('POO', { i: lastPoo }, 'Logged poo ' + lastPoo);
+};
+$('qbSleep').onclick = function() {
+  if (sleepStart) stopSleep();
+  else startSleep();
+};
 
-function fh(x){var v=((x%24)+24)%24,hh=Math.floor(v),mm=Math.round((v-hh)*60);return (hh%12||12)+(mm?':'+(mm<10?'0':'')+mm:'')+(hh<12?'A':'P')}
-function timeline(){
-  var now=Date.now(),s0=sod(now),h='',ze=zs+zl,step=zl>12?6:zl>6?3:zl>3?1:zl>1.5?.5:.25,x;
-  function X(v){return (v-zs)/zl*100}
-  h+='<div class="lane" style="top:40px"></div><div class="lane" style="top:74px"></div>';
-  for(x=Math.ceil(zs/step)*step;x<=ze+1e-6;x+=step)h+='<span class="tk" style="left:'+X(x)+'%">'+fh(x)+'</span>';
-  var nh=(now-s0)/H;if(nh>=zs&&nh<=ze)h+='<span class="now" style="left:'+X(nh)+'%"></span>';
-  E.forEach(function(e){
-    if(e.t<s0||e.t>=s0+DAY)return;
-    var a=(e.t-s0)/H,tip=fT(e.t)+' · '+title(e);
-    if(e.c==='SLEEP'){var l=Math.max(a,zs),r=Math.min(a+e.d/60,ze);if(r<=l)return;
-      h+='<button class="sl" style="left:'+X(l)+'%;width:'+((r-l)/zl*100)+'%" data-tip="'+tip+'" aria-label="'+tip+'"></button>';return}
-    if(a<zs||a>ze)return;
-    if(e.c==='MILK')h+='<button class="mk" style="left:'+X(a)+'%" data-tip="'+tip+'" aria-label="'+tip+'">'+e.v+'</button>';
-    else h+='<button class="dot" style="left:'+X(a)+'%;--c:var('+META[e.c][2]+')" data-tip="'+tip+'" aria-label="'+tip+'"></button>'});
-  $('tl').innerHTML=h;
-  $('zlab').textContent=zl>=24?'Full day':fh(zs)+' to '+fh(ze)}
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.onclick = function() {
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.classList.remove('on');
+      t.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+    tab.classList.add('on');
+    tab.setAttribute('aria-selected', 'true');
+    $('panel-' + tab.dataset.tab).classList.add('on');
+  };
+});
 
-function history(){
-  if(!E.length){$('log').innerHTML='<p class="empty">Nothing logged yet. Tap Log feed above to start.</p>';return}
-  var h='',last='',now=sod(Date.now());
-  E.slice(0,40).forEach(function(e){
-    var s=sod(e.t),lab=s===now?'Today':s===now-DAY?'Yesterday':new Date(e.t).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
-    if(lab!==last){h+='<div class="day">'+lab+'</div>';last=lab}
-    h+='<div class="it"><span class="ic">'+META[e.c][0]+'</span><div class="tx"><b>'+title(e)+'</b><small>'+fT(e.t)+'</small></div><button class="del" data-del="'+e.id+'" aria-label="Delete entry">✕</button></div>'});
-  $('log').innerHTML=h}
-$('log').onclick=function(ev){var b=ev.target.closest('[data-del]');if(!b)return;
-  var id=b.dataset.del,o=E.filter(function(e){return e.id===id})[0];if(!o)return;
-  rm(id);
-  toast('Entry deleted',function(){put(o)})};
+/* ---------- Render core ---------- */
+function hero() {
+  var n = new Date(), now = n.getTime(), s0 = sod(now), ml = 0, lf = null, ld = null, sl = 0, i, e;
+  $('clock').textContent = n.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  $('date').textContent = n.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  for (i = 0; i < E.length; i++) {
+    e = E[i];
+    if (e.c === 'MILK' && !lf && e.t <= now) lf = e;
+    if ((e.c === 'PEE' || e.c === 'POO') && !ld && e.t <= now) ld = e;
+    if (e.t >= s0 && e.t < s0 + DAY) {
+      if (e.c === 'MILK') ml += e.v;
+      if (e.c === 'SLEEP') sl += e.d;
+    }
+  }
+  $('ml').textContent = Math.round(ml);
+  $('tgl').textContent = 'of ' + TARGET + ' mL ✎';
+  $('arc').style.strokeDashoffset = 213.6 * (1 - Math.min(ml / TARGET, 1));
+  var cd = $('cd');
+  if (lf) {
+    var due = lf.t + GAP, df = due - now, m = Math.round(Math.abs(df) / 6e4);
+    $('next').textContent = fT(due);
+    cd.className = 'pill' + (df <= 0 ? ' over' : df <= 30 * 6e4 ? ' soon' : '');
+    cd.textContent = df > 0
+      ? 'In ' + (m >= 60 ? Math.floor(m / 60) + 'h ' : '') + (m % 60) + 'm'
+      : 'Due now · ' + m + 'm ago';
+    $('sFeed').textContent = ago(now - lf.t);
+    remind(lf, due, now);
+  } else {
+    $('next').textContent = '--';
+    cd.className = 'pill';
+    cd.textContent = 'No feeds yet';
+    $('sFeed').textContent = '--';
+  }
+  $('sDia').textContent = ld ? ago(now - ld.t) : '--';
+  $('sSlp').textContent = sl ? dur(sl) : '0m';
+  updateQuickLabel();
+}
+
+function chart() {
+  var ds = [], i, max = TARGET * 1.1;
+  for (i = 6; i >= 0; i--) {
+    var d = new Date(),
+        a = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i),
+        b = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i + 1),
+        t = 0, c = 0;
+    E.forEach(function(e) {
+      if (e.c === 'MILK' && e.t >= a.getTime() && e.t < b.getTime()) {
+        t += e.v;
+        c++;
+      }
+    });
+    ds.push({
+      l: i ? a.toLocaleDateString([], { weekday: 'short' }) : 'Today',
+      t: t,
+      c: c
+    });
+    max = Math.max(max, t);
+  }
+  $('cols').innerHTML = ds.map(function(d, i) {
+    return '<button class="col' + (selDay === i ? ' sel' : '') + '" data-d="' + i + '" aria-label="' + d.l + ': ' + d.t + ' mL"><span class="v">' + (d.t || '') + '</span><span class="bar" style="height:' + (d.t / max * 100 * 0.82) + '%"></span></button>';
+  }).join('');
+  $('dl').innerHTML = ds.map(function(d) { return '<span>' + d.l + '</span>'; }).join('');
+  $('tgs').textContent = TARGET + ' mL';
+  $('tg').style.bottom = (TARGET / max * 100 * 0.82) + '%';
+  $('cols').onclick = function(e) {
+    var b = e.target.closest('[data-d]');
+    if (!b) return;
+    selDay = +b.dataset.d;
+    var d = ds[selDay];
+    $('det').textContent = d.l + ': ' + d.t + ' mL in ' + d.c + (d.c === 1 ? ' feed' : ' feeds');
+    chart();
+  };
+}
+
+function fh(x) {
+  var v = ((x % 24) + 24) % 24,
+      hh = Math.floor(v),
+      mm = Math.round((v - hh) * 60);
+  return (hh % 12 || 12) + (mm ? ':' + (mm < 10 ? '0' : '') + mm : '') + (hh < 12 ? 'A' : 'P');
+}
+function timeline() {
+  var now = Date.now(), s0 = sod(now), h = '', ze = zs + zl, step = zl > 12 ? 6 : zl > 6 ? 3 : zl > 3 ? 1 : zl > 1.5 ? 0.5 : 0.25, x;
+  function X(v) { return (v - zs) / zl * 100; }
+  h += '<div class="lane" style="top:38px"></div><div class="lane" style="top:68px"></div>';
+  for (x = Math.ceil(zs / step) * step; x <= ze + 1e-6; x += step) {
+    h += '<span class="tk" style="left:' + X(x) + '%">' + fh(x) + '</span>';
+  }
+  var nh = (now - s0) / H;
+  if (nh >= zs && nh <= ze) h += '<span class="now" style="left:' + X(nh) + '%"></span>';
+  E.forEach(function(e) {
+    if (e.t < s0 || e.t >= s0 + DAY) return;
+    var a = (e.t - s0) / H, tip = fT(e.t) + ' · ' + title(e);
+    if (e.c === 'SLEEP') {
+      var l = Math.max(a, zs), r = Math.min(a + e.d / 60, ze);
+      if (r <= l) return;
+      h += '<button class="sl" style="left:' + X(l) + '%;width:' + ((r - l) / zl * 100) + '%" data-tip="' + tip + '" aria-label="' + tip + '"></button>';
+      return;
+    }
+    if (a < zs || a > ze) return;
+    if (e.c === 'MILK') {
+      h += '<button class="mk" style="left:' + X(a) + '%" data-tip="' + tip + '" aria-label="' + tip + '">' + e.v + '</button>';
+    } else {
+      h += '<button class="dot" style="left:' + X(a) + '%;--c:var(' + META[e.c][2] + ')" data-tip="' + tip + '" aria-label="' + tip + '"></button>';
+    }
+  });
+  // Live sleep block if active
+  if (sleepStart) {
+    var a = (sleepStart - s0) / H;
+    var l = Math.max(a, zs), r = Math.min((now - s0) / H, ze);
+    if (r > l) {
+      h += '<button class="sl" style="left:' + X(l) + '%;width:' + ((r - l) / zl * 100) + '%;opacity:0.95" data-tip="Sleeping now" aria-label="Sleeping now"></button>';
+    }
+  }
+  $('tl').innerHTML = h;
+  $('zlab').textContent = zl >= 24 ? 'Full day' : fh(zs) + ' – ' + fh(ze);
+}
+
+function history() {
+  if (!E.length) {
+    $('log').innerHTML = '<p class="empty">Nothing logged yet.<span class="hint">Tap the green button below to log your first feed.</span></p>';
+    return;
+  }
+  var h = '', last = '', now = sod(Date.now());
+  E.slice(0, 50).forEach(function(e) {
+    var s = sod(e.t),
+        lab = s === now ? 'Today' : s === now - DAY ? 'Yesterday' : new Date(e.t).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    if (lab !== last) {
+      h += '<div class="day">' + lab + '</div>';
+      last = lab;
+    }
+    h += '<div class="it" data-edit="' + e.id + '">' +
+      '<span class="ic">' + META[e.c][0] + '</span>' +
+      '<div class="tx"><b>' + title(e) + '</b><small>' + fT(e.t) + '</small></div>' +
+      '<button class="del" data-del="' + e.id + '" aria-label="Delete entry">✕</button>' +
+      '</div>';
+  });
+  $('log').innerHTML = h;
+}
+
+$('log').onclick = function(ev) {
+  var del = ev.target.closest('[data-del]');
+  if (del) {
+    ev.stopPropagation();
+    var id = del.dataset.del;
+    var o = E.filter(function(e) { return e.id === id; })[0];
+    if (!o) return;
+    rm(id);
+    toast('Entry deleted', function() { put(o); });
+    return;
+  }
+  var item = ev.target.closest('[data-edit]');
+  if (item) {
+    var id = item.dataset.edit;
+    var o = E.filter(function(e) { return e.id === id; })[0];
+    if (!o) return;
+    if (o.c === 'BATH' || o.c === 'VITD') {
+      // simple types — just allow delete for now
+      return;
+    }
+    openSheet(o.c, o);
+  }
+};
 
 var isRendering = false;
-function render(){
-  if(isRendering) return;
+function render() {
+  if (isRendering) return;
   isRendering = true;
-  requestAnimationFrame(function(){
+  requestAnimationFrame(function() {
     renderChips();
-    hero();chart();timeline();history();
+    renderTiles();
+    hero();
+    chart();
+    timeline();
+    history();
+    updateSleepUI();
     isRendering = false;
   });
 }
 
-/* ---------- theme, export, reset ---------- */
-function isDark(){var t=document.documentElement.dataset.theme;return t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches}
-try{var th=localStorage.getItem('cradl_theme');if(th)document.documentElement.dataset.theme=th}catch(e){}
-$('theme').onclick=function(){var t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cradl_theme',t)}catch(e){}};
-$('copy').onclick=function(){
-  var rows=['\uFEFFtime,type,detail'].concat(E.slice().reverse().map(function(e){return '"'+new Date(e.t).toISOString()+'","'+e.c+'","'+title(e).replace(/"/g,'""')+'"'}));
-  try{navigator.clipboard.writeText(rows.join('\n')).then(function(){toast('CSV copied to clipboard',null)},function(){toast('Copy was blocked by browser',null)})}catch(e){toast('Copy was blocked by browser',null)}};
-$('reset').onclick=function(){if(confirm('Replace all entries with sample data?')){E=sample();sort();save();render();toast('Sample data restored',null)}};
+/* ---------- Theme, export, reset ---------- */
+function isDark() {
+  var t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+try {
+  var th = localStorage.getItem('cradl_theme');
+  if (th) document.documentElement.dataset.theme = th;
+} catch (e) {}
+$('theme').onclick = function() {
+  var t = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('cradl_theme', t); } catch (e) {}
+};
 
-try{var tv=parseInt(localStorage.getItem('cradl_target'),10);if(tv>=50&&tv<=3000)TARGET=tv}catch(e){}
+$('copy').onclick = function() {
+  var rows = ['\uFEFFtime,type,detail'].concat(
+    E.slice().reverse().map(function(e) {
+      return '"' + new Date(e.t).toISOString() + '","' + e.c + '","' + title(e).replace(/"/g, '""') + '"';
+    })
+  );
+  try {
+    navigator.clipboard.writeText(rows.join('\n')).then(
+      function() { toast('CSV copied to clipboard', null); },
+      function() { toast('Copy was blocked by browser', null); }
+    );
+  } catch (e) {
+    toast('Copy was blocked by browser', null);
+  }
+};
 
-/* ---------- target ---------- */
-function openTarget(){
-  $('sheet').innerHTML='<h2 style="margin:0">Daily milk target</h2><div class="g4">'+[500,600,700,800].map(function(v){return '<button class="big'+(v===TARGET?' on':'')+'" data-a="tgt" data-v="'+v+'">'+v+'<small>mL</small></button>'}).join('')+'</div><div class="cu"><input id="cin" type="number" inputmode="numeric" min="50" max="3000" placeholder="Other target, mL" aria-label="Other daily target in mL"><button class="go" data-a="tgtC">Save</button></div>';
-  $('sheet').classList.add('on');$('scrim').classList.add('on')}
-function setTarget(v){TARGET=v;try{localStorage.setItem('cradl_target',String(v))}catch(e){}if(useCloud)db.collection('families').doc(fam).set({target:v},{merge:true}).catch(fail);closeSheet();render();toast('Daily target set to '+v+' mL',null)}
-$('tgt').onclick=openTarget;
-$('tgt').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openTarget()}};
+$('reset').onclick = function() {
+  if (confirm('Replace all entries with sample data?')) {
+    E = sample();
+    sort();
+    sleepStart = null;
+    save();
+    render();
+    toast('Sample data restored', null);
+  }
+};
 
-/* ---------- timeline zoom ---------- */
-var zs=0,zl=24,ptr={},moved=false,sx=0,sz=0,sl0=0,d0=0;
-function view(s,l){zl=Math.min(24,Math.max(1,l));zs=Math.min(24-zl,Math.max(0,s));timeline()}
-function zoomAt(f,c){var nl=Math.min(24,Math.max(1,zl*f));view(c-(c-zs)*(nl/zl),nl)}
-function ptrH(cx){var r=$('tl').getBoundingClientRect();return zs+(cx-r.left)/r.width*zl}
-$('zin').onclick=function(){zoomAt(.5,zs+zl/2)};
-$('zout').onclick=function(){zoomAt(2,zs+zl/2)};
-$('zall').onclick=function(){view(0,24)};
-$('znow').onclick=function(){var n=new Date(),c=n.getHours()+n.getMinutes()/60,l=zl>6?6:zl;view(c-l/2,l)};
-$('tl').addEventListener('pointerdown',function(e){ptr[e.pointerId]={x:e.clientX};moved=false;var k=Object.keys(ptr);
-  if(k.length===1){sx=e.clientX;sz=zs}else if(k.length===2){d0=Math.abs(ptr[k[0]].x-ptr[k[1]].x);sl0=zl}});
-window.addEventListener('pointermove',function(e){
-  var p=ptr[e.pointerId];if(!p)return;p.x=e.clientX;var k=Object.keys(ptr),r=$('tl').getBoundingClientRect();
-  if(k.length===1){var dx=e.clientX-sx;if(Math.abs(dx)>5)moved=true;if(moved&&zl<24)view(sz-dx/r.width*zl,zl)}
-  else if(k.length===2&&d0>10){moved=true;var d=Math.max(10,Math.abs(ptr[k[0]].x-ptr[k[1]].x));zoomAt((sl0*d0/d)/zl,ptrH((ptr[k[0]].x+ptr[k[1]].x)/2))}});
-function pend(e){delete ptr[e.pointerId];var k=Object.keys(ptr);if(k.length===1){sx=ptr[k[0]].x;sz=zs}}
-window.addEventListener('pointerup',pend);window.addEventListener('pointercancel',pend);
-$('tl').addEventListener('click',function(ev){if(moved)return;var b=ev.target.closest('[data-tip]');if(b)$('tip').textContent=b.dataset.tip});
-$('tl').addEventListener('dblclick',function(ev){zoomAt(.5,ptrH(ev.clientX))});
-$('tl').addEventListener('wheel',function(ev){
-  if(ev.ctrlKey||ev.metaKey){ev.preventDefault();zoomAt(ev.deltaY>0?1.15:1/1.15,ptrH(ev.clientX))}
-  else if(Math.abs(ev.deltaX)>Math.abs(ev.deltaY)&&zl<24){ev.preventDefault();view(zs+ev.deltaX/$('tl').clientWidth*zl,zl)}},{passive:false});
+try {
+  var tv = parseInt(localStorage.getItem('cradl_target'), 10);
+  if (tv >= 50 && tv <= 3000) TARGET = tv;
+} catch (e) {}
 
-/* ---------- feed reminders ---------- */
-var notif=false;try{notif=localStorage.getItem('cradl_notify')==='1'}catch(e){}
-function perm(){try{return 'Notification' in window?Notification.permission:'denied'}catch(e){return 'denied'}}
-function bell(){$('bell').textContent=notif?'🔔':'🔕';$('bell').setAttribute('aria-pressed',String(notif))}
-function alertFeed(body){
-  toast('🍼 Time to feed. '+body,null);
-  try{if(navigator.vibrate)navigator.vibrate([250,120,250])}catch(e){}
-  try{var C=window.AudioContext||window.webkitAudioContext,a=new C(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.15,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.6);o.start();o.stop(a.currentTime+.6)}catch(e){}
-  try{if(perm()==='granted')new Notification('Time to feed 🍼',{body:body,tag:'cradl-feed',requireInteraction:true})}catch(e){}}
-function remind(lf,due,now){
-  document.title=(now>=due?'🍼 Feed due · ':'')+'Cradl – Baby Tracker';
-  if(!notif||now<due||now-due>3e5)return;
-  var done='';try{done=localStorage.getItem('cradl_notified')||''}catch(e){}
-  if(done===lf.id)return;
-  try{localStorage.setItem('cradl_notified',lf.id)}catch(e){}
-  alertFeed('Last feed was '+ago(now-lf.t)+'.')}
-$('bell').onclick=function(){
-  if(notif){notif=false;try{localStorage.setItem('cradl_notify','0')}catch(e){}bell();toast('Feed reminders off',null);return}
-  notif=true;try{localStorage.setItem('cradl_notify','1')}catch(e){}bell();
-  var ok='Reminders on. Keep this page open.',lim='Reminders on with sound and vibration. Notifications are blocked.';
-  if(perm()==='default'){try{Notification.requestPermission().then(function(p){toast(p==='granted'?ok:lim,null)})}catch(e){toast(lim,null)}}
-  else toast(perm()==='granted'?ok:lim,null)};
-$('testn').onclick=function(){
-  if(perm()==='default'){try{Notification.requestPermission().then(function(){alertFeed('This is a test.')});return}catch(e){}}
-  alertFeed('This is a test.')};
+/* ---------- Target ---------- */
+function openTarget() {
+  $('sheet').innerHTML =
+    '<div class="sheet-handle"></div>' +
+    '<h2 style="margin:0">Daily milk target</h2>' +
+    '<div class="g4">' +
+    [500, 600, 700, 800].map(function(v) {
+      return '<button class="big' + (v === TARGET ? ' on' : '') + '" data-a="tgt" data-v="' + v + '">' + v + '<small>mL</small></button>';
+    }).join('') +
+    '</div>' +
+    '<div class="cu"><input id="cin" type="number" inputmode="numeric" min="50" max="3000" placeholder="Other target, mL" aria-label="Other daily target in mL"><button class="go" data-a="tgtC">Save</button></div>';
+  $('sheet').classList.add('on');
+  $('scrim').classList.add('on');
+}
+function setTarget(v) {
+  TARGET = v;
+  try { localStorage.setItem('cradl_target', String(v)); } catch (e) {}
+  if (useCloud) db.collection('families').doc(fam).set({ target: v }, { merge: true }).catch(fail);
+  closeSheet();
+  render();
+  toast('Daily target set to ' + v + ' mL', null);
+}
+$('tgt').onclick = openTarget;
+$('tgt').onkeydown = function(e) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    openTarget();
+  }
+};
 
-/* ---------- sharing (Firebase) ---------- */
-var db=null,authP=null,fam='',useCloud=false,u1=null,u2=null;
-try{fam=localStorage.getItem('cradl_family')||''}catch(e){}
-function cfgOk(){return !!FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.apiKey.indexOf('YOUR_')!==0}
-function fail(e){toast('Sync problem: '+((e&&e.code)||'unknown'),null)}
-function mode(){$('reset').style.display=useCloud?'none':''}
-function norm(v){v=String(v).toUpperCase().replace(/[^A-Z0-9]/g,'');return v.length===12?v.replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3'):''}
-function newCode(){var A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',o='',i,a=new Uint32Array(12);crypto.getRandomValues(a);for(i=0;i<12;i++){o+=A[a[i]%A.length];if(i%4===3&&i<11)o+='-'}return o}
-function setFam(c){fam=c;try{localStorage.setItem('cradl_family',c)}catch(e){}}
-function col(){return db.collection('families').doc(fam).collection('entries')}
-function put(o){if(useCloud){col().doc(o.id).set(o).catch(fail)}else{E.push(o);sort();save();render()}}
-function rm(id){if(useCloud){col().doc(id).delete().catch(fail)}else{E=E.filter(function(e){return e.id!==id});save();render()}}
-function stopCloud(){if(u1)u1();if(u2)u2();u1=u2=null}
-function startCloud(){
-  stopCloud();useCloud=true;mode();$('sub').textContent='Shared · connecting…';
-  u1=col().onSnapshot({includeMetadataChanges:true},function(s){
-    E=s.docs.map(function(d){return d.data()});sort();
-    $('sub').textContent='Shared · '+(s.metadata.hasPendingWrites?'saving…':(s.metadata.fromCache&&!navigator.onLine)?'offline':'synced');
-    render()},fail);
-  u2=db.collection('families').doc(fam).onSnapshot(function(s){var t=s.exists?s.data().target:0;if(t>=50&&t<=3000&&t!==TARGET){TARGET=t;try{localStorage.setItem('cradl_target',String(t))}catch(e){}render()}},fail)}
-function createFam(){
-  authP.then(function(){
-    var c=newCode(),b=db.batch(),d=db.collection('families').doc(c);
-    b.set(d,{target:TARGET,created:Date.now()});
-    E.filter(function(e){return !e.s}).forEach(function(e){b.set(d.collection('entries').doc(e.id),e)});
-    return b.commit().then(function(){setFam(c);startCloud();openShare()})}).catch(fail)}
-function joinFam(c){
-  authP.then(function(){return db.collection('families').doc(c).get()}).then(function(s){
-    if(!s.exists){toast('No shared log found for that code. Check it and try again.',null);return}
-    setFam(c);startCloud();closeSheet();toast('Joined the shared log',null)}).catch(fail)}
-function leaveFam(){
-  stopCloud();fam='';try{localStorage.removeItem('cradl_family')}catch(e){}
-  useCloud=false;E=load()||sample();sort();$('sub').textContent='Fast baby logging';mode();closeSheet();render();toast('This phone is back to its own private log',null)}
-function copyTxt(t,m){try{navigator.clipboard.writeText(t).then(function(){toast(m,null)},function(){toast('Copy was blocked. Select the code and copy it by hand.',null)})}catch(e){toast('Copy was blocked. Select the code and copy it by hand.',null)}}
-function invite(){
-  var u=location.href.split('#')[0]+'#join='+fam+'&cfg='+encodeURIComponent(btoa(JSON.stringify(FIREBASE_CONFIG))),m='Join our baby log in Cradl with code '+fam;
-  if(navigator.share){navigator.share({title:'Cradl',text:m,url:u}).catch(function(){})}else copyTxt(m+' '+u,'Invite copied')}
-function openShare(){
-  var h='<h2 style="margin:0">👥 Share with partner</h2>';
-  if(!db&&cfgOk())h+='<p class="sp2">Your Firebase settings are saved, but this copy of the app cannot reach Firebase. Open your hosted index.html to share.</p><button class="big" data-a="wiz" style="min-height:48px;font-size:15px">Change Firebase settings</button>';
-  else if(!db)h+='<p class="sp2">Live sharing uses a free cloud memory database, set up once in about 10 minutes. The simple guide below walks you through it step-by-step.</p><button class="go" data-a="wiz">Start the setup guide</button><div class="sp2">Did your partner already set it up? Paste the invite link they sent you.</div><div class="cu"><input id="cin" placeholder="https://…" aria-label="Invite link"><button class="go" data-a="paste">Join</button></div>';
-  else if(fam)h+='<p class="sp2">Your partner enters this code on their phone, or opens the invite link. Anyone with the code can see and edit the log, so share it only with them.</p><div class="code">'+fam+'</div><div class="cu"><button class="go" data-a="fcopy" style="flex:1">Copy code</button><button class="go" data-a="flink" style="flex:1">Send invite</button></div><button class="big" data-a="fleave" style="min-height:48px;font-size:15px">Stop sharing on this phone</button>';
-  else h+='<p class="sp2">One of you starts sharing and the other joins with the code. Your entries so far are copied into the shared log.</p><button class="go" data-a="fcreate">Start sharing</button><div class="sp2">Already have a code from your partner?</div><div class="cu"><input id="cin" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" aria-label="Partner’s code"><button class="go" data-a="fjoin">Join</button></div>'+(savedCfg()?'<button class="chip" data-a="wiz">Change Firebase settings</button>':'');
-  $('sheet').innerHTML=h;$('sheet').classList.add('on');$('scrim').classList.add('on')}
-$('share').onclick=openShare;
-function initCloud(){
-  if(!cfgOk()||typeof firebase==='undefined')return;
-  try{
-    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();
-    try{var pr=db.enablePersistence({synchronizeTabs:true});if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
-    authP=firebase.auth().signInAnonymously();
-    if(fam)authP.then(function(){startCloud()}).catch(fail);
-    var m=/#join=([A-Za-z0-9-]+)/.exec(location.hash);
-    if(m){var c=norm(m[1]);if(c&&c!==fam&&confirm('Join the shared baby log '+c+'?'))joinFam(c)}
-  }catch(e){db=null}}
+/* ---------- Timeline zoom ---------- */
+var zs = 0, zl = 24, ptr = {}, moved = false, sx = 0, sz = 0, sl0 = 0, d0 = 0;
+function view(s, l) {
+  zl = Math.min(24, Math.max(1, l));
+  zs = Math.min(24 - zl, Math.max(0, s));
+  timeline();
+}
+function zoomAt(f, c) {
+  var nl = Math.min(24, Math.max(1, zl * f));
+  view(c - (c - zs) * (nl / zl), nl);
+}
+function ptrH(cx) {
+  var r = $('tl').getBoundingClientRect();
+  return zs + (cx - r.left) / r.width * zl;
+}
+$('zin').onclick = function() { zoomAt(0.5, zs + zl / 2); };
+$('zout').onclick = function() { zoomAt(2, zs + zl / 2); };
+$('zall').onclick = function() { view(0, 24); };
+$('znow').onclick = function() {
+  var n = new Date(), c = n.getHours() + n.getMinutes() / 60, l = zl > 6 ? 6 : zl;
+  view(c - l / 2, l);
+};
+$('tl').addEventListener('pointerdown', function(e) {
+  ptr[e.pointerId] = { x: e.clientX };
+  moved = false;
+  var k = Object.keys(ptr);
+  if (k.length === 1) {
+    sx = e.clientX;
+    sz = zs;
+  } else if (k.length === 2) {
+    d0 = Math.abs(ptr[k[0]].x - ptr[k[1]].x);
+    sl0 = zl;
+  }
+});
+window.addEventListener('pointermove', function(e) {
+  var p = ptr[e.pointerId];
+  if (!p) return;
+  p.x = e.clientX;
+  var k = Object.keys(ptr), r = $('tl').getBoundingClientRect();
+  if (k.length === 1) {
+    var dx = e.clientX - sx;
+    if (Math.abs(dx) > 5) moved = true;
+    if (moved && zl < 24) view(sz - dx / r.width * zl, zl);
+  } else if (k.length === 2 && d0 > 10) {
+    moved = true;
+    var d = Math.max(10, Math.abs(ptr[k[0]].x - ptr[k[1]].x));
+    zoomAt((sl0 * d0 / d) / zl, ptrH((ptr[k[0]].x + ptr[k[1]].x) / 2));
+  }
+});
+function pend(e) {
+  delete ptr[e.pointerId];
+  var k = Object.keys(ptr);
+  if (k.length === 1) {
+    sx = ptr[k[0]].x;
+    sz = zs;
+  }
+}
+window.addEventListener('pointerup', pend);
+window.addEventListener('pointercancel', pend);
+$('tl').addEventListener('click', function(ev) {
+  if (moved) return;
+  var b = ev.target.closest('[data-tip]');
+  if (b) $('tip').textContent = b.dataset.tip;
+});
+$('tl').addEventListener('dblclick', function(ev) {
+  zoomAt(0.5, ptrH(ev.clientX));
+});
+$('tl').addEventListener('wheel', function(ev) {
+  if (ev.ctrlKey || ev.metaKey) {
+    ev.preventDefault();
+    zoomAt(ev.deltaY > 0 ? 1.15 : 1 / 1.15, ptrH(ev.clientX));
+  } else if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY) && zl < 24) {
+    ev.preventDefault();
+    view(zs + ev.deltaX / $('tl').clientWidth * zl, zl);
+  }
+}, { passive: false });
 
-/* ---------- guided setup ---------- */
-function savedCfg(){try{return !!localStorage.getItem('cradl_fbcfg')}catch(e){return false}}
-try{var sc=JSON.parse(localStorage.getItem('cradl_fbcfg')||'null');if(!cfgOk()&&sc&&sc.apiKey&&sc.projectId)FIREBASE_CONFIG=sc}catch(e){}
-try{var hm=/[#&]cfg=([^&]+)/.exec(location.hash);if(hm&&!cfgOk()){var ic=JSON.parse(atob(decodeURIComponent(hm[1])));if(ic.apiKey&&ic.projectId){FIREBASE_CONFIG=ic;localStorage.setItem('cradl_fbcfg',JSON.stringify(ic))}}}catch(e){}
-var RULES="rules_version = '2';\nservice cloud.firestore {\n  match /databases/{db}/documents {\n    match /families/{code} {\n      allow get: if request.auth != null;\n      allow create, update: if request.auth != null;\n      match /entries/{id} {\n        allow read, write: if request.auth != null;\n      }\n    }\n  }\n}";
-var WIZ=[
- ['Step 1: Create your free cloud account','Sign into Google and click "+ Add project". Type a name like "Cradl Baby", click Continue, then click "Create project".',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="15" y="15" width="370" height="30" rx="6" fill="#334155"/><circle cx="30" cy="30" r="5" fill="#ef4444"/><circle cx="45" cy="30" r="5" fill="#f59e0b"/><circle cx="60" cy="30" r="5" fill="#10b981"/><text x="80" y="34" fill="#94a3b8" font-size="11" font-family="sans-serif">console.firebase.google.com</text><rect x="130" y="70" width="140" height="80" rx="10" fill="#0f766e" stroke="#2dd4bf" stroke-width="2"/><text x="200" y="105" fill="#fff" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">+</text><text x="200" y="130" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" font-family="sans-serif">Add project</text></svg>'],
- ['Step 2: Connect Cradl as a Web App','Under "Get started by adding Firebase", click the blue Web icon (&lt;/&gt;). Type "Cradl", leave "Firebase Hosting" unchecked, and click "Register app".',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><text x="30" y="45" fill="#f8fafc" font-size="15" font-weight="bold" font-family="sans-serif">Get started by adding Firebase to your app</text><rect x="50" y="75" width="70" height="70" rx="14" fill="#334155" stroke="#38bdf8" stroke-width="2"/><text x="85" y="117" fill="#38bdf8" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">&lt;/&gt;</text><text x="85" y="160" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="sans-serif">Web</text><rect x="150" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="185" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">📱</text><rect x="250" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="285" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">🤖</text></svg>'],
- ['Step 3: Turn on Password-Free Partner Access','In the left sidebar menu, look for 🔒 Security -> Authentication. Click "Get Started", select "Anonymous" from the list, turn the toggle switch ON, and click "Save".',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="25" width="360" height="40" rx="8" fill="#334155"/><text x="40" y="50" fill="#f8fafc" font-size="13" font-weight="bold" font-family="sans-serif">Anonymous Provider</text><rect x="300" y="34" width="45" height="22" rx="11" fill="#10b981"/><circle cx="333" cy="45" r="8" fill="#fff"/><rect x="20" y="80" width="360" height="85" rx="8" fill="#0f172a" stroke="#334155"/><text x="40" y="110" fill="#94a3b8" font-size="12" font-family="sans-serif">Allows partners to connect anonymously without creating user accounts.</text><rect x="280" y="130" width="80" height="28" rx="6" fill="#0f766e"/><text x="320" y="148" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Save</text></svg>'],
- ['Step 4: Create Cloud Storage','In the left sidebar menu, look for 📂 Databases &amp; Storage -> Firestore Database. Click "Create database". Keep "Production mode" selected, pick your closest location, and click Next. (⚠️ Be careful: choose Firestore Database, NOT Realtime Database).',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="30" width="160" height="120" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/><circle cx="50" cy="55" r="8" fill="#10b981"/><text x="70" y="60" fill="#fff" font-size="13" font-weight="bold" font-family="sans-serif">Production mode</text><text x="50" y="90" fill="#94a3b8" font-size="11" font-family="sans-serif">Denies all reads/writes</text><text x="50" y="110" fill="#94a3b8" font-size="11" font-family="sans-serif">until security rules are set.</text><rect x="210" y="30" width="160" height="120" rx="10" fill="#0f172a" opacity="0.5"/><circle cx="230" cy="55" r="8" stroke="#94a3b8" stroke-width="2" fill="none"/><text x="250" y="60" fill="#94a3b8" font-size="13" font-family="sans-serif">Test mode</text></svg>'],
- ['Step 5: Set Privacy Permission Rules','Inside Firestore Database, click the "Rules" tab at the top. Tap "Copy the rules" below, select all existing text in the box on screen, paste over it, and click "Publish".',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="20" width="360" height="35" rx="6" fill="#0f172a"/><text x="40" y="42" fill="#94a3b8" font-size="12" font-family="sans-serif">Data</text><text x="100" y="42" fill="#2dd4bf" font-size="12" font-weight="bold" font-family="sans-serif">Rules</text><line x1="90" y1="52" x2="140" y2="52" stroke="#2dd4bf" stroke-width="2"/><rect x="20" y="65" width="360" height="105" rx="6" fill="#090d16"/><text x="35" y="90" fill="#f8fafc" font-size="11" font-family="monospace">rules_version = \'2\';</text><text x="35" y="110" fill="#2dd4bf" font-size="11" font-family="monospace">service cloud.firestore { ... }</text><rect x="290" y="25" width="80" height="26" rx="6" fill="#0f766e"/><text x="330" y="42" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Publish</text></svg>'],
- ['Step 6: Copy your Connection Key','Click the ⚙️ Gear Icon in the top-left menu -> Project Settings. Scroll down to "Your apps", highlight the entire block starting with "const firebaseConfig =", copy it, and paste it into the box below.',
-  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="25" width="340" height="140" rx="8" fill="#0f172a" stroke="#334155"/><text x="50" y="55" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">const firebaseConfig = {</text><text x="70" y="80" fill="#38bdf8" font-size="12" font-family="monospace">apiKey: "AIzaSyD...",</text><text x="70" y="105" fill="#38bdf8" font-size="12" font-family="monospace">projectId: "cradl-app-123",</text><text x="70" y="130" fill="#38bdf8" font-size="12" font-family="monospace">appId: "1:987654..."</text><text x="50" y="150" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">};</text></svg>']
+/* ---------- Feed reminders ---------- */
+var notif = false;
+try { notif = localStorage.getItem('cradl_notify') === '1'; } catch (e) {}
+function perm() {
+  try { return 'Notification' in window ? Notification.permission : 'denied'; } catch (e) { return 'denied'; }
+}
+function bell() {
+  $('bell').textContent = notif ? '🔔' : '🔕';
+  $('bell').setAttribute('aria-pressed', String(notif));
+}
+function alertFeed(body) {
+  toast('🍼 Time to feed. ' + body, null);
+  try { if (navigator.vibrate) navigator.vibrate([250, 120, 250]); } catch (e) {}
+  try {
+    var C = window.AudioContext || window.webkitAudioContext,
+        a = new C(),
+        o = a.createOscillator(),
+        g = a.createGain();
+    o.connect(g);
+    g.connect(a.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.15, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.6);
+    o.start();
+    o.stop(a.currentTime + 0.6);
+  } catch (e) {}
+  try {
+    if (perm() === 'granted') {
+      new Notification('Time to feed 🍼', { body: body, tag: 'cradl-feed', requireInteraction: true });
+    }
+  } catch (e) {}
+}
+function remind(lf, due, now) {
+  document.title = (now >= due ? '🍼 Feed due · ' : '') + 'Cradl – Baby Tracker';
+  if (!notif || now < due || now - due > 3e5) return;
+  var done = '';
+  try { done = localStorage.getItem('cradl_notified') || ''; } catch (e) {}
+  if (done === lf.id) return;
+  try { localStorage.setItem('cradl_notified', lf.id); } catch (e) {}
+  alertFeed('Last feed was ' + ago(now - lf.t) + '.');
+}
+$('bell').onclick = function() {
+  if (notif) {
+    notif = false;
+    try { localStorage.setItem('cradl_notify', '0'); } catch (e) {}
+    bell();
+    toast('Feed reminders off', null);
+    return;
+  }
+  notif = true;
+  try { localStorage.setItem('cradl_notify', '1'); } catch (e) {}
+  bell();
+  var ok = 'Reminders on. Keep this page open.',
+      lim = 'Reminders on with sound and vibration. Notifications are blocked.';
+  if (perm() === 'default') {
+    try {
+      Notification.requestPermission().then(function(p) {
+        toast(p === 'granted' ? ok : lim, null);
+      });
+    } catch (e) { toast(lim, null); }
+  } else {
+    toast(perm() === 'granted' ? ok : lim, null);
+  }
+};
+$('testn').onclick = function() {
+  if (perm() === 'default') {
+    try {
+      Notification.requestPermission().then(function() { alertFeed('This is a test.'); });
+      return;
+    } catch (e) {}
+  }
+  alertFeed('This is a test.');
+};
+
+/* ---------- Sharing (Firebase) ---------- */
+var db = null, authP = null, fam = '', useCloud = false, u1 = null, u2 = null;
+try { fam = localStorage.getItem('cradl_family') || ''; } catch (e) {}
+function cfgOk() {
+  return !!FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('YOUR_') !== 0;
+}
+function fail(e) { toast('Sync problem: ' + ((e && e.code) || 'unknown'), null); }
+function mode() { $('reset').style.display = useCloud ? 'none' : ''; }
+function norm(v) {
+  v = String(v).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return v.length === 12 ? v.replace(/(.{4})(.{4})(.{4})/, '$1-$2-$3') : '';
+}
+function newCode() {
+  var A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', o = '', i, a = new Uint32Array(12);
+  crypto.getRandomValues(a);
+  for (i = 0; i < 12; i++) {
+    o += A[a[i] % A.length];
+    if (i % 4 === 3 && i < 11) o += '-';
+  }
+  return o;
+}
+function setFam(c) {
+  fam = c;
+  try { localStorage.setItem('cradl_family', c); } catch (e) {}
+}
+function col() { return db.collection('families').doc(fam).collection('entries'); }
+function put(o) {
+  if (useCloud) {
+    col().doc(o.id).set(o).catch(fail);
+  } else {
+    E.push(o);
+    sort();
+    save();
+    render();
+  }
+}
+function rm(id) {
+  if (useCloud) {
+    col().doc(id).delete().catch(fail);
+  } else {
+    E = E.filter(function(e) { return e.id !== id; });
+    save();
+    render();
+  }
+}
+function stopCloud() {
+  if (u1) u1();
+  if (u2) u2();
+  u1 = u2 = null;
+}
+function startCloud() {
+  stopCloud();
+  useCloud = true;
+  mode();
+  $('sub').textContent = 'Shared · connecting…';
+  u1 = col().onSnapshot({ includeMetadataChanges: true }, function(s) {
+    E = s.docs.map(function(d) { return d.data(); });
+    sort();
+    $('sub').textContent = 'Shared · ' + (s.metadata.hasPendingWrites ? 'saving…' : (s.metadata.fromCache && !navigator.onLine) ? 'offline' : 'synced');
+    render();
+  }, fail);
+  u2 = db.collection('families').doc(fam).onSnapshot(function(s) {
+    var t = s.exists ? s.data().target : 0;
+    if (t >= 50 && t <= 3000 && t !== TARGET) {
+      TARGET = t;
+      try { localStorage.setItem('cradl_target', String(t)); } catch (e) {}
+      render();
+    }
+  }, fail);
+}
+function createFam() {
+  authP.then(function() {
+    var c = newCode(),
+        b = db.batch(),
+        d = db.collection('families').doc(c);
+    b.set(d, { target: TARGET, created: Date.now() });
+    E.filter(function(e) { return !e.s; }).forEach(function(e) {
+      b.set(d.collection('entries').doc(e.id), e);
+    });
+    return b.commit().then(function() {
+      setFam(c);
+      startCloud();
+      openShare();
+    });
+  }).catch(fail);
+}
+function joinFam(c) {
+  authP.then(function() {
+    return db.collection('families').doc(c).get();
+  }).then(function(s) {
+    if (!s.exists) {
+      toast('No shared log found for that code. Check it and try again.', null);
+      return;
+    }
+    setFam(c);
+    startCloud();
+    closeSheet();
+    toast('Joined the shared log', null);
+  }).catch(fail);
+}
+function leaveFam() {
+  stopCloud();
+  fam = '';
+  try { localStorage.removeItem('cradl_family'); } catch (e) {}
+  useCloud = false;
+  var loaded = load();
+  E = (loaded && loaded.entries) || sample();
+  sort();
+  $('sub').textContent = 'Fast baby logging';
+  mode();
+  closeSheet();
+  render();
+  toast('This phone is back to its own private log', null);
+}
+function copyTxt(t, m) {
+  try {
+    navigator.clipboard.writeText(t).then(
+      function() { toast(m, null); },
+      function() { toast('Copy was blocked. Select the code and copy it by hand.', null); }
+    );
+  } catch (e) {
+    toast('Copy was blocked. Select the code and copy it by hand.', null);
+  }
+}
+function invite() {
+  var u = location.href.split('#')[0] + '#join=' + fam + '&cfg=' + encodeURIComponent(btoa(JSON.stringify(FIREBASE_CONFIG))),
+      m = 'Join our baby log in Cradl with code ' + fam;
+  if (navigator.share) {
+    navigator.share({ title: 'Cradl', text: m, url: u }).catch(function() {});
+  } else {
+    copyTxt(m + ' ' + u, 'Invite copied');
+  }
+}
+function openShare() {
+  var h = '<div class="sheet-handle"></div><h2 style="margin:0">👥 Share with partner</h2>';
+  if (!db && cfgOk()) {
+    h += '<p class="sp2">Your Firebase settings are saved, but this copy of the app cannot reach Firebase. Open your hosted index.html to share.</p><button class="big" data-a="wiz" style="min-height:48px;font-size:15px">Change Firebase settings</button>';
+  } else if (!db) {
+    h += '<p class="sp2">Live sharing uses a free cloud database. The guide walks you through it in about 10 minutes.</p><button class="go" data-a="wiz">Start the setup guide</button><div class="sp2">Did your partner already set it up? Paste the invite link they sent you.</div><div class="cu"><input id="cin" placeholder="https://…" aria-label="Invite link"><button class="go" data-a="paste">Join</button></div>';
+  } else if (fam) {
+    h += '<p class="sp2">Your partner enters this code on their phone, or opens the invite link. Anyone with the code can see and edit the log.</p><div class="code">' + fam + '</div><div class="cu"><button class="go" data-a="fcopy" style="flex:1">Copy code</button><button class="go" data-a="flink" style="flex:1">Send invite</button></div><button class="big" data-a="fleave" style="min-height:48px;font-size:15px">Stop sharing on this phone</button>';
+  } else {
+    h += '<p class="sp2">One of you starts sharing and the other joins with the code. Your entries so far are copied into the shared log.</p><button class="go" data-a="fcreate">Start sharing</button><div class="sp2">Already have a code from your partner?</div><div class="cu"><input id="cin" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" aria-label="Partner’s code"><button class="go" data-a="fjoin">Join</button></div>' + (savedCfg() ? '<button class="chip" data-a="wiz">Change Firebase settings</button>' : '');
+  }
+  $('sheet').innerHTML = h;
+  $('sheet').classList.add('on');
+  $('scrim').classList.add('on');
+}
+$('share').onclick = openShare;
+
+function initCloud() {
+  if (!cfgOk() || typeof firebase === 'undefined') return;
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    try {
+      var pr = db.enablePersistence({ synchronizeTabs: true });
+      if (pr && pr.catch) pr.catch(function() {});
+    } catch (e) {}
+    authP = firebase.auth().signInAnonymously();
+    if (fam) authP.then(function() { startCloud(); }).catch(fail);
+    var m = /#join=([A-Za-z0-9-]+)/.exec(location.hash);
+    if (m) {
+      var c = norm(m[1]);
+      if (c && c !== fam && confirm('Join the shared baby log ' + c + '?')) joinFam(c);
+    }
+  } catch (e) {
+    db = null;
+  }
+}
+
+/* ---------- Guided setup ---------- */
+function savedCfg() {
+  try { return !!localStorage.getItem('cradl_fbcfg'); } catch (e) { return false; }
+}
+try {
+  var sc = JSON.parse(localStorage.getItem('cradl_fbcfg') || 'null');
+  if (!cfgOk() && sc && sc.apiKey && sc.projectId) FIREBASE_CONFIG = sc;
+} catch (e) {}
+try {
+  var hm = /[#&]cfg=([^&]+)/.exec(location.hash);
+  if (hm && !cfgOk()) {
+    var ic = JSON.parse(atob(decodeURIComponent(hm[1])));
+    if (ic.apiKey && ic.projectId) {
+      FIREBASE_CONFIG = ic;
+      localStorage.setItem('cradl_fbcfg', JSON.stringify(ic));
+    }
+  }
+} catch (e) {}
+
+var RULES = "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{db}/documents {\n    match /families/{code} {\n      allow get: if request.auth != null;\n      allow create, update: if request.auth != null;\n      match /entries/{id} {\n        allow read, write: if request.auth != null;\n      }\n    }\n  }\n}";
+var WIZ = [
+  ['Step 1: Create your free cloud account', 'Sign into Google and click "+ Add project". Type a name like "Cradl Baby", click Continue, then click "Create project".',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="15" y="15" width="370" height="30" rx="6" fill="#334155"/><circle cx="30" cy="30" r="5" fill="#ef4444"/><circle cx="45" cy="30" r="5" fill="#f59e0b"/><circle cx="60" cy="30" r="5" fill="#10b981"/><text x="80" y="34" fill="#94a3b8" font-size="11" font-family="sans-serif">console.firebase.google.com</text><rect x="130" y="70" width="140" height="80" rx="10" fill="#0f766e" stroke="#2dd4bf" stroke-width="2"/><text x="200" y="105" fill="#fff" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">+</text><text x="200" y="130" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" font-family="sans-serif">Add project</text></svg>'],
+  ['Step 2: Connect Cradl as a Web App', 'Under "Get started by adding Firebase", click the blue Web icon (&lt;/&gt;). Type "Cradl", leave "Firebase Hosting" unchecked, and click "Register app".',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><text x="30" y="45" fill="#f8fafc" font-size="15" font-weight="bold" font-family="sans-serif">Get started by adding Firebase to your app</text><rect x="50" y="75" width="70" height="70" rx="14" fill="#334155" stroke="#38bdf8" stroke-width="2"/><text x="85" y="117" fill="#38bdf8" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">&lt;/&gt;</text><text x="85" y="160" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="sans-serif">Web</text><rect x="150" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="185" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">📱</text><rect x="250" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="285" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">🤖</text></svg>'],
+  ['Step 3: Turn on Password-Free Partner Access', 'In the left sidebar menu, look for 🔒 Security → Authentication. Click "Get Started", select "Anonymous" from the list, turn the toggle switch ON, and click "Save".',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="25" width="360" height="40" rx="8" fill="#334155"/><text x="40" y="50" fill="#f8fafc" font-size="13" font-weight="bold" font-family="sans-serif">Anonymous Provider</text><rect x="300" y="34" width="45" height="22" rx="11" fill="#10b981"/><circle cx="333" cy="45" r="8" fill="#fff"/><rect x="20" y="80" width="360" height="85" rx="8" fill="#0f172a" stroke="#334155"/><text x="40" y="110" fill="#94a3b8" font-size="12" font-family="sans-serif">Allows partners to connect anonymously without creating user accounts.</text><rect x="280" y="130" width="80" height="28" rx="6" fill="#0f766e"/><text x="320" y="148" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Save</text></svg>'],
+  ['Step 4: Create Cloud Storage', 'In the left sidebar menu, look for 📂 Databases &amp; Storage → Firestore Database. Click "Create database". Keep "Production mode" selected, pick your closest location, and click Next. (⚠️ Be careful: choose Firestore Database, NOT Realtime Database).',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="30" width="160" height="120" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/><circle cx="50" cy="55" r="8" fill="#10b981"/><text x="70" y="60" fill="#fff" font-size="13" font-weight="bold" font-family="sans-serif">Production mode</text><text x="50" y="90" fill="#94a3b8" font-size="11" font-family="sans-serif">Denies all reads/writes</text><text x="50" y="110" fill="#94a3b8" font-size="11" font-family="sans-serif">until security rules are set.</text><rect x="210" y="30" width="160" height="120" rx="10" fill="#0f172a" opacity="0.5"/><circle cx="230" cy="55" r="8" stroke="#94a3b8" stroke-width="2" fill="none"/><text x="250" y="60" fill="#94a3b8" font-size="13" font-family="sans-serif">Test mode</text></svg>'],
+  ['Step 5: Set Privacy Permission Rules', 'Inside Firestore Database, click the "Rules" tab at the top. Tap "Copy the rules" below, select all existing text in the box on screen, paste over it, and click "Publish".',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="20" width="360" height="35" rx="6" fill="#0f172a"/><text x="40" y="42" fill="#94a3b8" font-size="12" font-family="sans-serif">Data</text><text x="100" y="42" fill="#2dd4bf" font-size="12" font-weight="bold" font-family="sans-serif">Rules</text><line x1="90" y1="52" x2="140" y2="52" stroke="#2dd4bf" stroke-width="2"/><rect x="20" y="65" width="360" height="105" rx="6" fill="#090d16"/><text x="35" y="90" fill="#f8fafc" font-size="11" font-family="monospace">rules_version = \'2\';</text><text x="35" y="110" fill="#2dd4bf" font-size="11" font-family="monospace">service cloud.firestore { ... }</text><rect x="290" y="25" width="80" height="26" rx="6" fill="#0f766e"/><text x="330" y="42" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Publish</text></svg>'],
+  ['Step 6: Copy your Connection Key', 'Click the ⚙️ Gear Icon in the top-left menu → Project Settings. Scroll down to "Your apps", highlight the entire block starting with "const firebaseConfig =", copy it, and paste it into the box below.',
+   '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="25" width="340" height="140" rx="8" fill="#0f172a" stroke="#334155"/><text x="50" y="55" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">const firebaseConfig = {</text><text x="70" y="80" fill="#38bdf8" font-size="12" font-family="monospace">apiKey: "AIzaSyD...",</text><text x="70" y="105" fill="#38bdf8" font-size="12" font-family="monospace">projectId: "cradl-app-123",</text><text x="70" y="130" fill="#38bdf8" font-size="12" font-family="monospace">appId: "1:987654..."</text><text x="50" y="150" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">};</text></svg>']
 ];
-var wz=0;
-function openWiz(){wz=0;closeSheet();$('wiz').classList.add('on');wizR()}
-function wizR(){
-  var s=WIZ[wz],L=WIZ.length,last=wz===L-1,h='<div class="wz"><div class="hr" style="align-items:center"><b style="font:700 22px Fraunces,Georgia,serif">Set up sharing</b><button class="ib" data-w="x" aria-label="Close setup">✕</button></div><div class="pbar"><i style="width:'+((wz+1)/L*100)+'%"></i></div><div class="mut">Step '+(wz+1)+' of '+L+' · free, done once, about 10 minutes. Easiest on a computer.</div><div class="box" style="display:grid;gap:12px"><h2 style="margin:0">'+s[0]+'</h2><p class="sp2" style="font-size:15px;color:var(--ink)">'+s[1]+'</p>';
-  if(s[2])h+=s[2];
-  if(!last)h+='<a class="lk" href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Open Firebase console ↗ (Opens in new tab)</a>';
-  if(wz===4)h+='<pre>'+RULES+'</pre><button class="go" data-w="c">Copy the rules</button>';
-  if(last)h+='<textarea id="wcfg" placeholder="Paste your const firebaseConfig block here..." aria-label="Firebase settings"></textarea>';
-  h+='</div><div class="cu">'+(wz?'<button class="chip" style="flex:1" data-w="b">Back</button>':'')+(last?'<button class="go" style="flex:2" data-w="k">Connect</button>':'<button class="go" style="flex:2" data-w="n">Next</button>')+'</div></div>';
-  $('wiz').innerHTML=h;$('wiz').scrollTop=0}
-function wizConnect(){
-  var t=$('wcfg').value;
-  function g(k){var m=new RegExp(k+'\\s*[:=]\\s*["\'](.+?)["\']').exec(t);return m?m[1]:''}
-  var c={apiKey:g('apiKey'),authDomain:g('authDomain'),projectId:g('projectId'),appId:g('appId')};
-  if(!c.apiKey||!c.projectId){toast('Could not find apiKey and projectId. Please paste the whole firebaseConfig block.',null);return}
-  if(!c.authDomain)c.authDomain=c.projectId+'.firebaseapp.com';
-  try{localStorage.setItem('cradl_fbcfg',JSON.stringify(c));localStorage.setItem('cradl_openshare','1')}catch(e){toast('Browser blocked saving settings.',null);return}
-  location.reload()}
-function pasteInvite(v){
-  v=String(v).trim();if(!/^https?:\/\//.test(v)){toast('Paste the full invite link starting with https.',null);return}
-  var a=v.split('#');if(a[0]===location.href.split('#')[0]){location.hash=a[1]||'';location.reload()}else location.href=v}
-$('wiz').onclick=function(e){var b=e.target.closest('[data-w]');if(!b)return;var w=b.dataset.w;
-  if(w==='x')$('wiz').classList.remove('on');
-  else if(w==='b'){wz--;wizR()}else if(w==='n'){wz++;wizR()}
-  else if(w==='c')copyTxt(RULES,'Rules copied to clipboard');
-  else if(w==='k')wizConnect()};
+var wz = 0;
+function openWiz() {
+  wz = 0;
+  closeSheet();
+  $('wiz').classList.add('on');
+  wizR();
+}
+function wizR() {
+  var s = WIZ[wz], L = WIZ.length, last = wz === L - 1,
+      h = '<div class="wz"><div class="hr" style="align-items:center"><b style="font:700 22px Fraunces,Georgia,serif">Set up sharing</b><button class="ib" data-w="x" aria-label="Close setup">✕</button></div><div class="pbar"><i style="width:' + ((wz + 1) / L * 100) + '%"></i></div><div class="mut">Step ' + (wz + 1) + ' of ' + L + ' · free, done once, about 10 minutes. Easiest on a computer.</div><div class="box" style="display:grid;gap:12px"><h2 style="margin:0">' + s[0] + '</h2><p class="sp2" style="font-size:15px;color:var(--ink)">' + s[1] + '</p>';
+  if (s[2]) h += s[2];
+  if (!last) h += '<a class="lk" href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Open Firebase console ↗</a>';
+  if (wz === 4) h += '<pre>' + RULES + '</pre><button class="go" data-w="c">Copy the rules</button>';
+  if (last) h += '<textarea id="wcfg" placeholder="Paste your const firebaseConfig block here..." aria-label="Firebase settings"></textarea>';
+  h += '</div><div class="cu">' + (wz ? '<button class="chip" style="flex:1" data-w="b">Back</button>' : '') + (last ? '<button class="go" style="flex:2" data-w="k">Connect</button>' : '<button class="go" style="flex:2" data-w="n">Next</button>') + '</div></div>';
+  $('wiz').innerHTML = h;
+  $('wiz').scrollTop = 0;
+}
+function wizConnect() {
+  var t = $('wcfg').value;
+  function g(k) {
+    var m = new RegExp(k + '\\s*[:=]\\s*["\'](.+?)["\']').exec(t);
+    return m ? m[1] : '';
+  }
+  var c = {
+    apiKey: g('apiKey'),
+    authDomain: g('authDomain'),
+    projectId: g('projectId'),
+    appId: g('appId')
+  };
+  if (!c.apiKey || !c.projectId) {
+    toast('Could not find apiKey and projectId. Please paste the whole firebaseConfig block.', null);
+    return;
+  }
+  if (!c.authDomain) c.authDomain = c.projectId + '.firebaseapp.com';
+  try {
+    localStorage.setItem('cradl_fbcfg', JSON.stringify(c));
+    localStorage.setItem('cradl_openshare', '1');
+  } catch (e) {
+    toast('Browser blocked saving settings.', null);
+    return;
+  }
+  location.reload();
+}
+function pasteInvite(v) {
+  v = String(v).trim();
+  if (!/^https?:\/\//.test(v)) {
+    toast('Paste the full invite link starting with https.', null);
+    return;
+  }
+  var a = v.split('#');
+  if (a[0] === location.href.split('#')[0]) {
+    location.hash = a[1] || '';
+    location.reload();
+  } else {
+    location.href = v;
+  }
+}
+$('wiz').onclick = function(e) {
+  var b = e.target.closest('[data-w]');
+  if (!b) return;
+  var w = b.dataset.w;
+  if (w === 'x') $('wiz').classList.remove('on');
+  else if (w === 'b') { wz--; wizR(); }
+  else if (w === 'n') { wz++; wizR(); }
+  else if (w === 'c') copyTxt(RULES, 'Rules copied to clipboard');
+  else if (w === 'k') wizConnect();
+};
 
-E=load();if(!E){E=sample();save()}
-if(fam&&cfgOk()&&typeof firebase!=='undefined')E=[];
-sort();bell();mode();render();initCloud();
-try{if(localStorage.getItem('cradl_openshare')){localStorage.removeItem('cradl_openshare');setTimeout(openShare,400)}}catch(e){}
-setInterval(hero,1000);
+/* ---------- First-run tip ---------- */
+try {
+  if (!localStorage.getItem('cradl_tip_seen')) {
+    $('tipBanner').classList.add('on');
+  }
+} catch (e) {}
+$('tipClose').onclick = function() {
+  $('tipBanner').classList.remove('on');
+  try { localStorage.setItem('cradl_tip_seen', '1'); } catch (e) {}
+};
+
+/* ---------- Init ---------- */
+var loaded = load();
+if (loaded) {
+  E = loaded.entries || [];
+  if (loaded.lastVol) lastVol = loaded.lastVol;
+  if (loaded.lastPee) lastPee = loaded.lastPee;
+  if (loaded.lastPoo) lastPoo = loaded.lastPoo;
+  if (loaded.sleepStart) sleepStart = loaded.sleepStart;
+} else {
+  E = sample();
+  save();
+}
+if (fam && cfgOk() && typeof firebase !== 'undefined') E = [];
+sort();
+bell();
+mode();
+render();
+initCloud();
+try {
+  if (localStorage.getItem('cradl_openshare')) {
+    localStorage.removeItem('cradl_openshare');
+    setTimeout(openShare, 400);
+  }
+} catch (e) {}
+
+setInterval(function() {
+  hero();
+  if (sleepStart) tickSleep();
+}, 1000);
 </script>
 </body>
 </html>
