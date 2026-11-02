@@ -100,6 +100,8 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 .big.on{background:var(--btn);color:var(--on)}
 .big.on small{color:inherit}
 .tl{margin:6px 14px 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.code{font:700 26px Fraunces,Georgia,serif;letter-spacing:2px;text-align:center;user-select:all;-webkit-user-select:all;background:var(--chip);border-radius:14px;padding:14px}
+.sp2{margin:0;font-size:14px;color:var(--mut)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -107,8 +109,9 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 <div class="app">
 <header>
   <div class="logo" aria-hidden="true">🍼</div>
-  <div><b>Cradl</b><small>Fast baby logging</small></div>
+  <div><b>Cradl</b><small id="sub">Fast baby logging</small></div>
   <div class="sp"></div>
+  <button class="ib" id="share" aria-label="Share with partner">👥</button>
   <button class="ib" id="bell" aria-label="Feed reminders" aria-pressed="false">🔕</button>
   <button class="ib" id="theme" aria-label="Switch light or dark mode">🌓</button>
 </header>
@@ -158,12 +161,19 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 <div class="foot"><button id="testn">Test reminder</button><button id="copy">Copy as CSV</button><button id="reset">Reset sample data</button></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <div id="scrim"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast" role="status"><span id="tmsg"></span><button id="tundo">Undo</button></div>
 
 <script>
 var K='cradl_v2',TARGET=600,GAP=3*36e5,H=36e5,DAY=864e5;
+/* ===== SHARING SETUP =====
+   Paste your Firebase web app settings below (Firebase console > Project settings > Your apps > Web app).
+   Leave the YOUR_ values as they are to keep each phone's log private to that phone. */
+var FIREBASE_CONFIG={apiKey:'YOUR_API_KEY',authDomain:'YOUR_PROJECT.firebaseapp.com',projectId:'YOUR_PROJECT',appId:'YOUR_APP_ID'};
 var E=[],off=0,selDay=-1,undoFn=null,tT;
 var $=function(i){return document.getElementById(i)};
 var META={MILK:['🍼','Milk','--milk'],PEE:['💧','Pee','--pee'],POO:['💩','Poo','--poo'],BATH:['🛁','Bath','--bath'],SLEEP:['🌙','Sleep','--slp'],VITD:['☀️','Vitamin D','--vit']};
@@ -182,7 +192,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 
 function sample(){
   var n=Date.now(),a=[],i,d,s;
-  function p(t,c,x){var o={id:uid(),t:t,c:c};for(var k in x)o[k]=x[k];a.push(o)}
+  function p(t,c,x){var o={id:uid(),t:t,c:c,s:1};for(var k in x)o[k]=x[k];a.push(o)}
   for(d=1;d<=6;d++){s=dayStart(d);
     [[7,150],[10,120],[13,150],[16,120],[19,60]].forEach(function(f){p(s+f[0]*H+d*6e4,'MILK',{v:f[1]})});
     p(s+9*H,'PEE',{i:'++'});p(s+14*H,'POO',{i:'++'});p(s+18*H,'BATH',{});p(s+8*H,'VITD',{});p(s+11*H,'SLEEP',{d:60})}
@@ -193,8 +203,8 @@ function sample(){
 function lastVol(){for(var i=0;i<E.length;i++)if(E[i].c==='MILK')return E[i].v;return 150}
 function add(c,x,msg){
   var o={id:uid(),t:Date.now()-off*6e4,c:c};for(var k in x)o[k]=x[k];
-  E.push(o);sort();save();off=0;render();
-  toast(msg,function(){E=E.filter(function(e){return e.id!==o.id});save();render()})}
+  put(o);off=0;render();
+  toast(msg,function(){rm(o.id)})}
 function toast(m,fn){$('tmsg').textContent=m;undoFn=fn;$('tundo').style.display=fn?'':'none';$('toast').classList.add('on');clearTimeout(tT);tT=setTimeout(function(){$('toast').classList.remove('on')},5000)}
 $('tundo').onclick=function(){if(undoFn)undoFn();undoFn=null;$('toast').classList.remove('on')};
 
@@ -228,7 +238,12 @@ $('sheet').onclick=function(e){
   else if(a==='slp'){closeSheet();add('SLEEP',{d:v},'Logged '+dur(v)+' sleep')}
   else if(a==='slpC'){if(n>=5&&n<=720){closeSheet();add('SLEEP',{d:Math.round(n)},'Logged '+dur(Math.round(n))+' sleep')}else inp.focus()}
   else if(a==='tgt'){setTarget(v)}
-  else if(a==='tgtC'){if(n>=50&&n<=3000)setTarget(Math.round(n));else inp.focus()}}
+  else if(a==='tgtC'){if(n>=50&&n<=3000)setTarget(Math.round(n));else inp.focus()}
+  else if(a==='fcreate'){createFam()}
+  else if(a==='fjoin'){var cd=norm(inp?inp.value:'');if(cd)joinFam(cd);else{toast('A code has 12 letters and numbers.',null);if(inp)inp.focus()}}
+  else if(a==='fcopy'){copyTxt(fam,'Code copied')}
+  else if(a==='flink'){invite()}
+  else if(a==='fleave'){if(confirm('Stop sharing on this phone? The shared log stays online for your partner.'))leaveFam()}}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
 
 /* ---------- static UI ---------- */
@@ -300,8 +315,8 @@ function history(){
   $('log').innerHTML=h}
 $('log').onclick=function(ev){var b=ev.target.closest('[data-del]');if(!b)return;
   var id=b.dataset.del,o=E.filter(function(e){return e.id===id})[0];if(!o)return;
-  E=E.filter(function(e){return e.id!==id});save();render();
-  toast('Entry deleted',function(){E.push(o);sort();save();render()})};
+  rm(id);
+  toast('Entry deleted',function(){put(o)})};
 
 function render(){
   document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('on',+c.dataset.o===off)});
@@ -322,7 +337,7 @@ try{var tv=parseInt(localStorage.getItem('cradl_target'),10);if(tv>=50&&tv<=3000
 function openTarget(){
   $('sheet').innerHTML='<h2 style="margin:0">Daily milk target</h2><div class="g4">'+[500,600,700,800].map(function(v){return '<button class="big'+(v===TARGET?' on':'')+'" data-a="tgt" data-v="'+v+'">'+v+'<small>mL</small></button>'}).join('')+'</div><div class="cu"><input id="cin" type="number" inputmode="numeric" min="50" max="3000" placeholder="Other target, mL" aria-label="Other daily target in mL"><button class="go" data-a="tgtC">Save</button></div>';
   $('sheet').classList.add('on');$('scrim').classList.add('on')}
-function setTarget(v){TARGET=v;try{localStorage.setItem('cradl_target',String(v))}catch(e){}closeSheet();render();toast('Daily target set to '+v+' mL',null)}
+function setTarget(v){TARGET=v;try{localStorage.setItem('cradl_target',String(v))}catch(e){}if(useCloud)db.collection('families').doc(fam).set({target:v},{merge:true}).catch(fail);closeSheet();render();toast('Daily target set to '+v+' mL',null)}
 $('tgt').onclick=openTarget;
 $('tgt').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openTarget()}};
 
@@ -375,7 +390,64 @@ $('testn').onclick=function(){
   if(perm()==='default'){try{Notification.requestPermission().then(function(){alertFeed('This is a test.')});return}catch(e){}}
   alertFeed('This is a test.')};
 
-E=load();if(!E){E=sample();save()}sort();bell();render();
+/* ---------- sharing (Firebase) ---------- */
+var db=null,authP=null,fam='',useCloud=false,u1=null,u2=null;
+try{fam=localStorage.getItem('cradl_family')||''}catch(e){}
+function cfgOk(){return !!FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.apiKey.indexOf('YOUR_')!==0}
+function fail(e){toast('Sync problem: '+((e&&e.code)||'unknown'),null)}
+function mode(){$('reset').style.display=useCloud?'none':''}
+function norm(v){v=String(v).toUpperCase().replace(/[^A-Z0-9]/g,'');return v.length===12?v.replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3'):''}
+function newCode(){var A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',o='',i,a=new Uint32Array(12);crypto.getRandomValues(a);for(i=0;i<12;i++){o+=A[a[i]%A.length];if(i%4===3&&i<11)o+='-'}return o}
+function setFam(c){fam=c;try{localStorage.setItem('cradl_family',c)}catch(e){}}
+function col(){return db.collection('families').doc(fam).collection('entries')}
+function put(o){if(useCloud){col().doc(o.id).set(o).catch(fail)}else{E.push(o);sort();save();render()}}
+function rm(id){if(useCloud){col().doc(id).delete().catch(fail)}else{E=E.filter(function(e){return e.id!==id});save();render()}}
+function stopCloud(){if(u1)u1();if(u2)u2();u1=u2=null}
+function startCloud(){
+  stopCloud();useCloud=true;mode();$('sub').textContent='Shared · connecting…';
+  u1=col().onSnapshot({includeMetadataChanges:true},function(s){
+    E=s.docs.map(function(d){return d.data()});sort();
+    $('sub').textContent='Shared · '+(s.metadata.hasPendingWrites?'saving…':(s.metadata.fromCache&&!navigator.onLine)?'offline':'synced');
+    render()},fail);
+  u2=db.collection('families').doc(fam).onSnapshot(function(s){var t=s.exists?s.data().target:0;if(t>=50&&t<=3000&&t!==TARGET){TARGET=t;try{localStorage.setItem('cradl_target',String(t))}catch(e){}render()}},fail)}
+function createFam(){
+  authP.then(function(){
+    var c=newCode(),b=db.batch(),d=db.collection('families').doc(c);
+    b.set(d,{target:TARGET,created:Date.now()});
+    E.filter(function(e){return !e.s}).forEach(function(e){b.set(d.collection('entries').doc(e.id),e)});
+    return b.commit().then(function(){setFam(c);startCloud();openShare()})}).catch(fail)}
+function joinFam(c){
+  authP.then(function(){return db.collection('families').doc(c).get()}).then(function(s){
+    if(!s.exists){toast('No shared log found for that code. Check it and try again.',null);return}
+    setFam(c);startCloud();closeSheet();toast('Joined the shared log',null)}).catch(fail)}
+function leaveFam(){
+  stopCloud();fam='';try{localStorage.removeItem('cradl_family')}catch(e){}
+  useCloud=false;E=load()||sample();sort();$('sub').textContent='Fast baby logging';mode();closeSheet();render();toast('This phone is back to its own private log',null)}
+function copyTxt(t,m){try{navigator.clipboard.writeText(t).then(function(){toast(m,null)},function(){toast('Copy was blocked. Select the code and copy it by hand.',null)})}catch(e){toast('Copy was blocked. Select the code and copy it by hand.',null)}}
+function invite(){
+  var u=location.href.split('#')[0]+'#join='+fam,m='Join our baby log in Cradl with code '+fam;
+  if(navigator.share){navigator.share({title:'Cradl',text:m,url:u}).catch(function(){})}else copyTxt(m+' '+u,'Invite copied')}
+function openShare(){
+  var h='<h2 style="margin:0">\U0001F465 Share with partner</h2>';
+  if(!db)h+='<p class="sp2">Sharing is not set up yet. Open index.html, paste your Firebase settings into FIREBASE_CONFIG near the top of the script, and upload it again. Until then each phone keeps its own log.</p>';
+  else if(fam)h+='<p class="sp2">Your partner enters this code on their phone, or opens the invite link. Anyone with the code can see and edit the log, so share it only with them.</p><div class="code">'+fam+'</div><div class="cu"><button class="go" data-a="fcopy" style="flex:1">Copy code</button><button class="go" data-a="flink" style="flex:1">Send invite</button></div><button class="big" data-a="fleave" style="min-height:48px;font-size:15px">Stop sharing on this phone</button>';
+  else h+='<p class="sp2">One of you starts sharing and the other joins with the code. Your entries so far are copied into the shared log.</p><button class="go" data-a="fcreate">Start sharing</button><div class="sp2">Already have a code from your partner?</div><div class="cu"><input id="cin" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" aria-label="Partner’s code"><button class="go" data-a="fjoin">Join</button></div>';
+  $('sheet').innerHTML=h;$('sheet').classList.add('on');$('scrim').classList.add('on')}
+$('share').onclick=openShare;
+function initCloud(){
+  if(!cfgOk()||typeof firebase==='undefined')return;
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();
+    try{var pr=db.enablePersistence({synchronizeTabs:true});if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
+    authP=firebase.auth().signInAnonymously();
+    if(fam)authP.then(function(){startCloud()}).catch(fail);
+    var m=/#join=([A-Za-z0-9-]+)/.exec(location.hash);
+    if(m){var c=norm(m[1]);if(c&&c!==fam&&confirm('Join the shared baby log '+c+'?'))joinFam(c)}
+  }catch(e){db=null}}
+
+E=load();if(!E){E=sample();save()}
+if(fam&&cfgOk()&&typeof firebase!=='undefined')E=[];
+sort();bell();mode();render();initCloud();
 setInterval(hero,1000);
 </script>
 </body>
