@@ -102,6 +102,15 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 .tl{margin:6px 14px 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .code{font:700 26px Fraunces,Georgia,serif;letter-spacing:2px;text-align:center;user-select:all;-webkit-user-select:all;background:var(--chip);border-radius:14px;padding:14px}
 .sp2{margin:0;font-size:14px;color:var(--mut)}
+#wiz{position:fixed;inset:0;background:var(--bg);z-index:40;overflow-y:auto;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px))}
+#wiz.on{display:block}
+.wz{max-width:560px;margin:0 auto;display:grid;gap:14px}
+.pbar{height:6px;border-radius:9px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--btn);transition:width .2s}
+.wz pre{margin:0;padding:12px;border-radius:12px;background:var(--chip);font-size:12px;overflow-x:auto}
+.wz textarea{width:100%;min-height:150px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:12px;font:14px monospace}
+.lk{display:grid;place-items:center;min-height:52px;border-radius:14px;background:var(--chip);font-weight:700;text-decoration:none;color:var(--ink)}
+#toast{z-index:50}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -164,6 +173,7 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<div id="wiz" role="dialog" aria-modal="true"></div>
 <div id="scrim"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast" role="status"><span id="tmsg"></span><button id="tundo">Undo</button></div>
@@ -243,6 +253,8 @@ $('sheet').onclick=function(e){
   else if(a==='fjoin'){var cd=norm(inp?inp.value:'');if(cd)joinFam(cd);else{toast('A code has 12 letters and numbers.',null);if(inp)inp.focus()}}
   else if(a==='fcopy'){copyTxt(fam,'Code copied')}
   else if(a==='flink'){invite()}
+  else if(a==='wiz'){openWiz()}
+  else if(a==='paste'){pasteInvite(inp?inp.value:'')}
   else if(a==='fleave'){if(confirm('Stop sharing on this phone? The shared log stays online for your partner.'))leaveFam()}}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
 
@@ -425,13 +437,14 @@ function leaveFam(){
   useCloud=false;E=load()||sample();sort();$('sub').textContent='Fast baby logging';mode();closeSheet();render();toast('This phone is back to its own private log',null)}
 function copyTxt(t,m){try{navigator.clipboard.writeText(t).then(function(){toast(m,null)},function(){toast('Copy was blocked. Select the code and copy it by hand.',null)})}catch(e){toast('Copy was blocked. Select the code and copy it by hand.',null)}}
 function invite(){
-  var u=location.href.split('#')[0]+'#join='+fam,m='Join our baby log in Cradl with code '+fam;
+  var u=location.href.split('#')[0]+'#join='+fam+'&cfg='+encodeURIComponent(btoa(JSON.stringify(FIREBASE_CONFIG))),m='Join our baby log in Cradl with code '+fam;
   if(navigator.share){navigator.share({title:'Cradl',text:m,url:u}).catch(function(){})}else copyTxt(m+' '+u,'Invite copied')}
 function openShare(){
   var h='<h2 style="margin:0">\U0001F465 Share with partner</h2>';
-  if(!db)h+='<p class="sp2">Live sharing needs a free Firebase database, set up once by the app owner. Until then each phone keeps its own log.</p><ol class="sp2" style="padding-left:20px;display:grid;gap:6px;margin:0"><li>Create a project at console.firebase.google.com and add a web app.</li><li>Turn on Authentication, then the Anonymous sign-in method.</li><li>Create a Firestore database in production mode and publish the security rules.</li><li>Paste your web app settings into FIREBASE_CONFIG at the top of index.html, then host it (GitHub Pages works).</li></ol><p class="sp2">Sharing runs only from your own hosted copy of index.html, not from the claude.ai preview.</p>';
+  if(!db&&cfgOk())h+='<p class="sp2">Your Firebase settings are saved, but this copy of the app cannot reach Firebase. Open your hosted index.html (for example on GitHub Pages) to share.</p><button class="big" data-a="wiz" style="min-height:48px;font-size:15px">Change Firebase settings</button>';
+  else if(!db)h+='<p class="sp2">Live sharing uses a free Firebase database, set up once in about 10 minutes. The guide walks you through it and fills in the settings for you.</p><button class="go" data-a="wiz">Start the setup guide</button><div class="sp2">Did your partner already set it up? Paste the invite link they sent you.</div><div class="cu"><input id="cin" placeholder="https://…" aria-label="Invite link"><button class="go" data-a="paste">Join</button></div>';
   else if(fam)h+='<p class="sp2">Your partner enters this code on their phone, or opens the invite link. Anyone with the code can see and edit the log, so share it only with them.</p><div class="code">'+fam+'</div><div class="cu"><button class="go" data-a="fcopy" style="flex:1">Copy code</button><button class="go" data-a="flink" style="flex:1">Send invite</button></div><button class="big" data-a="fleave" style="min-height:48px;font-size:15px">Stop sharing on this phone</button>';
-  else h+='<p class="sp2">One of you starts sharing and the other joins with the code. Your entries so far are copied into the shared log.</p><button class="go" data-a="fcreate">Start sharing</button><div class="sp2">Already have a code from your partner?</div><div class="cu"><input id="cin" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" aria-label="Partner’s code"><button class="go" data-a="fjoin">Join</button></div>';
+  else h+='<p class="sp2">One of you starts sharing and the other joins with the code. Your entries so far are copied into the shared log.</p><button class="go" data-a="fcreate">Start sharing</button><div class="sp2">Already have a code from your partner?</div><div class="cu"><input id="cin" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" aria-label="Partner’s code"><button class="go" data-a="fjoin">Join</button></div>'+(savedCfg()?'<button class="chip" data-a="wiz">Change Firebase settings</button>':'');
   $('sheet').innerHTML=h;$('sheet').classList.add('on');$('scrim').classList.add('on')}
 $('share').onclick=openShare;
 function initCloud(){
@@ -445,9 +458,48 @@ function initCloud(){
     if(m){var c=norm(m[1]);if(c&&c!==fam&&confirm('Join the shared baby log '+c+'?'))joinFam(c)}
   }catch(e){db=null}}
 
+/* ---------- guided setup ---------- */
+function savedCfg(){try{return !!localStorage.getItem('cradl_fbcfg')}catch(e){return false}}
+try{var sc=JSON.parse(localStorage.getItem('cradl_fbcfg')||'null');if(!cfgOk()&&sc&&sc.apiKey&&sc.projectId)FIREBASE_CONFIG=sc}catch(e){}
+try{var hm=/[#&]cfg=([^&]+)/.exec(location.hash);if(hm&&!cfgOk()){var ic=JSON.parse(atob(decodeURIComponent(hm[1])));if(ic.apiKey&&ic.projectId){FIREBASE_CONFIG=ic;localStorage.setItem('cradl_fbcfg',JSON.stringify(ic))}}}catch(e){}
+var RULES="rules_version = '2';\nservice cloud.firestore {\n  match /databases/{db}/documents {\n    match /families/{code} {\n      allow get: if request.auth != null;\n      allow create, update: if request.auth != null;\n      match /entries/{id} {\n        allow read, write: if request.auth != null;\n      }\n    }\n  }\n}";
+var WIZ=[
+ ['Create a Firebase project','Open the Firebase console and sign in with a Google account. Click Create a project, name it (for example cradl) and continue. You can turn Google Analytics off.'],
+ ['Add a web app','On the project page click the web icon (&lt;/&gt;), give the app a nickname and skip Hosting. Keep that page handy, because the last step needs the settings it shows.'],
+ ['Turn on sign-in','Open Build, then Authentication, then Get started. Under Sign-in method choose Anonymous, switch it on and save. This lets each phone connect without a password.'],
+ ['Create the database','Open Build, then Firestore database, and click Create database. Choose Standard edition if asked, a location close to you (it cannot be changed later), and Production mode.'],
+ ['Publish the rules','In Firestore open the Rules tab, replace everything with the rules below and click Publish.'],
+ ['Paste your settings','Open Project settings, scroll to Your apps and copy the firebaseConfig block. Paste it below. The app reads the values for you, so there is no file to edit.']];
+var wz=0;
+function openWiz(){wz=0;closeSheet();$('wiz').classList.add('on');wizR()}
+function wizR(){
+  var s=WIZ[wz],L=WIZ.length,last=wz===L-1,h='<div class="wz"><div class="hr" style="align-items:center"><b style="font:700 22px Fraunces,Georgia,serif">Set up sharing</b><button class="ib" data-w="x" aria-label="Close setup">✕</button></div><div class="pbar"><i style="width:'+((wz+1)/L*100)+'%"></i></div><div class="mut">Step '+(wz+1)+' of '+L+' · free, done once, about 10 minutes. Easiest on a computer.</div><div class="box" style="display:grid;gap:12px"><h2 style="margin:0">'+s[0]+'</h2><p class="sp2" style="font-size:15px;color:var(--ink)">'+s[1]+'</p>';
+  if(!last)h+='<a class="lk" href="https://console.firebase.google.com/" target="_blank" rel="noopener">Open Firebase console ↗</a>';
+  if(wz===4)h+='<pre>'+RULES+'</pre><button class="go" data-w="c">Copy the rules</button>';
+  if(last)h+='<textarea id="wcfg" placeholder="Paste the firebaseConfig block here" aria-label="Firebase settings"></textarea>';
+  h+='</div><div class="cu">'+(wz?'<button class="chip" style="flex:1" data-w="b">Back</button>':'')+(last?'<button class="go" style="flex:2" data-w="k">Connect</button>':'<button class="go" style="flex:2" data-w="n">Next</button>')+'</div></div>';
+  $('wiz').innerHTML=h;$('wiz').scrollTop=0}
+function wizConnect(){
+  var t=$('wcfg').value;
+  function g(k){var m=new RegExp(k+'\\s*[:=]\\s*["\'](.+?)["\']').exec(t);return m?m[1]:''}
+  var c={apiKey:g('apiKey'),authDomain:g('authDomain'),projectId:g('projectId'),appId:g('appId')};
+  if(!c.apiKey||!c.projectId){toast('I could not find apiKey and projectId. Paste the whole firebaseConfig block.',null);return}
+  if(!c.authDomain)c.authDomain=c.projectId+'.firebaseapp.com';
+  try{localStorage.setItem('cradl_fbcfg',JSON.stringify(c));localStorage.setItem('cradl_openshare','1')}catch(e){toast('This browser would not save the settings.',null);return}
+  location.reload()}
+function pasteInvite(v){
+  v=String(v).trim();if(!/^https?:\/\//.test(v)){toast('Paste the full invite link, starting with https.',null);return}
+  var a=v.split('#');if(a[0]===location.href.split('#')[0]){location.hash=a[1]||'';location.reload()}else location.href=v}
+$('wiz').onclick=function(e){var b=e.target.closest('[data-w]');if(!b)return;var w=b.dataset.w;
+  if(w==='x')$('wiz').classList.remove('on');
+  else if(w==='b'){wz--;wizR()}else if(w==='n'){wz++;wizR()}
+  else if(w==='c')copyTxt(RULES,'Rules copied');
+  else if(w==='k')wizConnect()};
+
 E=load();if(!E){E=sample();save()}
 if(fam&&cfgOk()&&typeof firebase!=='undefined')E=[];
 sort();bell();mode();render();initCloud();
+try{if(localStorage.getItem('cradl_openshare')){localStorage.removeItem('cradl_openshare');setTimeout(openShare,400)}}catch(e){}
 setInterval(hero,1000);
 </script>
 </body>
