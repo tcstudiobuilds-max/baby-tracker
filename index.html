@@ -105,10 +105,11 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 #wiz{position:fixed;inset:0;background:var(--bg);z-index:40;overflow-y:auto;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px))}
 #wiz.on{display:block}
 .wz{max-width:560px;margin:0 auto;display:grid;gap:14px}
-.pbar{height:6px;border-radius:9px;background:var(--line);overflow:hidden}
+.pbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;background:var(--btn);transition:width .2s}
 .wz pre{margin:0;padding:12px;border-radius:12px;background:var(--chip);font-size:12px;overflow-x:auto}
 .wz textarea{width:100%;min-height:150px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:12px;font:14px monospace}
+.wz-img{width:100%;border-radius:14px;border:2px solid var(--line);background:var(--chip);overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
 .lk{display:grid;place-items:center;min-height:52px;border-radius:14px;background:var(--chip);font-weight:700;text-decoration:none;color:var(--ink)}
 #toast{z-index:50}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -180,9 +181,6 @@ h2{font:700 18px Fraunces,Georgia,serif;margin:0 0 10px}
 
 <script>
 var K='cradl_v2',TARGET=600,GAP=3*36e5,H=36e5,DAY=864e5;
-/* ===== SHARING SETUP =====
-   Paste your Firebase web app settings below (Firebase console > Project settings > Your apps > Web app).
-   Leave the YOUR_ values as they are to keep each phone's log private to that phone. */
 var FIREBASE_CONFIG={apiKey:'YOUR_API_KEY',authDomain:'YOUR_PROJECT.firebaseapp.com',projectId:'YOUR_PROJECT',appId:'YOUR_APP_ID'};
 var E=[],off=0,selDay=-1,undoFn=null,tT;
 var $=function(i){return document.getElementById(i)};
@@ -339,7 +337,7 @@ function isDark(){var t=document.documentElement.dataset.theme;return t?t==='dar
 try{var th=localStorage.getItem('cradl_theme');if(th)document.documentElement.dataset.theme=th}catch(e){}
 $('theme').onclick=function(){var t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cradl_theme',t)}catch(e){}};
 $('copy').onclick=function(){
-  var rows=['time,type,detail'].concat(E.slice().reverse().map(function(e){return new Date(e.t).toISOString()+','+e.c+',"'+title(e)+'"'}));
+  var rows=['\uFEFFtime,type,detail'].concat(E.slice().reverse().map(function(e){return new Date(e.t).toISOString()+','+e.c+',"'+title(e).replace(/"/g,'""')+'"'}));
   try{navigator.clipboard.writeText(rows.join('\n')).then(function(){toast('CSV copied',null)},function(){toast('Copy was blocked by the browser',null)})}catch(e){toast('Copy was blocked by the browser',null)}};
 $('reset').onclick=function(){if(confirm('Replace all entries with sample data?')){E=sample();sort();save();render();toast('Sample data restored',null)}};
 
@@ -440,7 +438,7 @@ function invite(){
   var u=location.href.split('#')[0]+'#join='+fam+'&cfg='+encodeURIComponent(btoa(JSON.stringify(FIREBASE_CONFIG))),m='Join our baby log in Cradl with code '+fam;
   if(navigator.share){navigator.share({title:'Cradl',text:m,url:u}).catch(function(){})}else copyTxt(m+' '+u,'Invite copied')}
 function openShare(){
-  var h='<h2 style="margin:0">\U0001F465 Share with partner</h2>';
+  var h='<h2 style="margin:0">👥 Share with partner</h2>';
   if(!db&&cfgOk())h+='<p class="sp2">Your Firebase settings are saved, but this copy of the app cannot reach Firebase. Open your hosted index.html (for example on GitHub Pages) to share.</p><button class="big" data-a="wiz" style="min-height:48px;font-size:15px">Change Firebase settings</button>';
   else if(!db)h+='<p class="sp2">Live sharing uses a free Firebase database, set up once in about 10 minutes. The guide walks you through it and fills in the settings for you.</p><button class="go" data-a="wiz">Start the setup guide</button><div class="sp2">Did your partner already set it up? Paste the invite link they sent you.</div><div class="cu"><input id="cin" placeholder="https://…" aria-label="Invite link"><button class="go" data-a="paste">Join</button></div>';
   else if(fam)h+='<p class="sp2">Your partner enters this code on their phone, or opens the invite link. Anyone with the code can see and edit the log, so share it only with them.</p><div class="code">'+fam+'</div><div class="cu"><button class="go" data-a="fcopy" style="flex:1">Copy code</button><button class="go" data-a="flink" style="flex:1">Send invite</button></div><button class="big" data-a="fleave" style="min-height:48px;font-size:15px">Stop sharing on this phone</button>';
@@ -464,17 +462,23 @@ try{var sc=JSON.parse(localStorage.getItem('cradl_fbcfg')||'null');if(!cfgOk()&&
 try{var hm=/[#&]cfg=([^&]+)/.exec(location.hash);if(hm&&!cfgOk()){var ic=JSON.parse(atob(decodeURIComponent(hm[1])));if(ic.apiKey&&ic.projectId){FIREBASE_CONFIG=ic;localStorage.setItem('cradl_fbcfg',JSON.stringify(ic))}}}catch(e){}
 var RULES="rules_version = '2';\nservice cloud.firestore {\n  match /databases/{db}/documents {\n    match /families/{code} {\n      allow get: if request.auth != null;\n      allow create, update: if request.auth != null;\n      match /entries/{id} {\n        allow read, write: if request.auth != null;\n      }\n    }\n  }\n}";
 var WIZ=[
- ['Create a Firebase project','Open the Firebase console and sign in with a Google account. Click Create a project, name it (for example cradl) and continue. You can turn Google Analytics off.'],
- ['Add a web app','On the project page click the web icon (&lt;/&gt;), give the app a nickname and skip Hosting. Keep that page handy, because the last step needs the settings it shows.'],
- ['Turn on sign-in','Open Build, then Authentication, then Get started. Under Sign-in method choose Anonymous, switch it on and save. This lets each phone connect without a password.'],
- ['Create the database','Open Build, then Firestore database, and click Create database. Choose Standard edition if asked, a location close to you (it cannot be changed later), and Production mode.'],
- ['Publish the rules','In Firestore open the Rules tab, replace everything with the rules below and click Publish.'],
- ['Paste your settings','Open Project settings, scroll to Your apps and copy the firebaseConfig block. Paste it below. The app reads the values for you, so there is no file to edit.']];
+ ['Create a Firebase project','Open the Firebase console and sign in with a Google account. Click Create a project, name it (for example cradl) and continue. You can turn Google Analytics off.',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="15" y="15" width="370" height="30" rx="6" fill="#334155"/><circle cx="30" cy="30" r="5" fill="#ef4444"/><circle cx="45" cy="30" r="5" fill="#f59e0b"/><circle cx="60" cy="30" r="5" fill="#10b981"/><text x="80" y="34" fill="#94a3b8" font-size="11" font-family="sans-serif">console.firebase.google.com</text><rect x="130" y="70" width="140" height="80" rx="10" fill="#0f766e" stroke="#2dd4bf" stroke-width="2"/><text x="200" y="105" fill="#fff" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">+</text><text x="200" y="130" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle" font-family="sans-serif">Add project</text></svg>'],
+ ['Add a web app','On the project page click the web icon (</>), give the app a nickname like "Cradl" and skip Firebase Hosting. Keep that page handy!',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><text x="30" y="45" fill="#f8fafc" font-size="15" font-weight="bold" font-family="sans-serif">Get started by adding Firebase to your app</text><rect x="50" y="75" width="70" height="70" rx="14" fill="#334155" stroke="#38bdf8" stroke-width="2"/><text x="85" y="117" fill="#38bdf8" font-size="24" font-weight="bold" text-anchor="middle" font-family="sans-serif">&lt;/&gt;</text><text x="85" y="160" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="sans-serif">Web</text><rect x="150" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="185" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">📱</text><rect x="250" y="75" width="70" height="70" rx="14" fill="#334155"/><text x="285" y="117" fill="#94a3b8" font-size="22" text-anchor="middle" font-family="sans-serif">🤖</text></svg>'],
+ ['Turn on sign-in','Open Build > Authentication > Get started. Under Sign-in method, select Anonymous, enable the toggle switch, and click Save.',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="25" width="360" height="40" rx="8" fill="#334155"/><text x="40" y="50" fill="#f8fafc" font-size="13" font-weight="bold" font-family="sans-serif">Anonymous Provider</text><rect x="300" y="34" width="45" height="22" rx="11" fill="#10b981"/><circle cx="333" cy="45" r="8" fill="#fff"/><rect x="20" y="80" width="360" height="85" rx="8" fill="#0f172a" stroke="#334155"/><text x="40" y="110" fill="#94a3b8" font-size="12" font-family="sans-serif">Allows partners to connect anonymously without creating user accounts.</text><rect x="280" y="130" width="80" height="28" rx="6" fill="#0f766e"/><text x="320" y="148" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Save</text></svg>'],
+ ['Create the database','Open Build > Firestore Database > Create database. Choose Production mode and select a location nearest to you.',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="30" width="160" height="120" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/><circle cx="50" cy="55" r="8" fill="#10b981"/><text x="70" y="60" fill="#fff" font-size="13" font-weight="bold" font-family="sans-serif">Production mode</text><text x="50" y="90" fill="#94a3b8" font-size="11" font-family="sans-serif">Denies all reads/writes</text><text x="50" y="110" fill="#94a3b8" font-size="11" font-family="sans-serif">until security rules are set.</text><rect x="210" y="30" width="160" height="120" rx="10" fill="#0f172a" opacity="0.5"/><circle cx="230" cy="55" r="8" stroke="#94a3b8" stroke-width="2" fill="none"/><text x="250" y="60" fill="#94a3b8" font-size="13" font-family="sans-serif">Test mode</text></svg>'],
+ ['Publish the rules','In Cloud Firestore, click the Rules tab. Replace everything with the rules box below and click Publish.',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="20" y="20" width="360" height="35" rx="6" fill="#0f172a"/><text x="40" y="42" fill="#94a3b8" font-size="12" font-family="sans-serif">Data</text><text x="100" y="42" fill="#2dd4bf" font-size="12" font-weight="bold" font-family="sans-serif">Rules</text><line x1="90" y1="52" x2="140" y2="52" stroke="#2dd4bf" stroke-width="2"/><rect x="20" y="65" width="360" height="105" rx="6" fill="#090d16"/><text x="35" y="90" fill="#f8fafc" font-size="11" font-family="monospace">rules_version = \'2\';</text><text x="35" y="110" fill="#2dd4bf" font-size="11" font-family="monospace">service cloud.firestore { ... }</text><rect x="290" y="25" width="80" height="26" rx="6" fill="#0f766e"/><text x="330" y="42" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Publish</text></svg>'],
+ ['Paste your settings','Open Project Settings, scroll down to "Your apps", copy the firebaseConfig block, and paste it into the input box below.',
+  '<svg viewBox="0 0 400 190" style="width:100%;height:auto;display:block;background:#1e293b;border-radius:12px"><rect x="30" y="25" width="340" height="140" rx="8" fill="#0f172a" stroke="#334155"/><text x="50" y="55" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">const firebaseConfig = {</text><text x="70" y="80" fill="#38bdf8" font-size="12" font-family="monospace">apiKey: "AIzaSyD...",</text><text x="70" y="105" fill="#38bdf8" font-size="12" font-family="monospace">projectId: "cradl-app-123",</text><text x="70" y="130" fill="#38bdf8" font-size="12" font-family="monospace">appId: "1:987654..."</text><text x="50" y="150" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace">};</text></svg>']];
 var wz=0;
 function openWiz(){wz=0;closeSheet();$('wiz').classList.add('on');wizR()}
 function wizR(){
-  var s=WIZ[wz],L=WIZ.length,last=wz===L-1,h='<div class="wz"><div class="hr" style="align-items:center"><b style="font:700 22px Fraunces,Georgia,serif">Set up sharing</b><button class="ib" data-w="x" aria-label="Close setup">✕</button></div><div class="pbar"><i style="width:'+((wz+1)/L*100)+'%"></i></div><div class="mut">Step '+(wz+1)+' of '+L+' · free, done once, about 10 minutes. Easiest on a computer.</div><div class="box" style="display:grid;gap:12px"><h2 style="margin:0">'+s[0]+'</h2><p class="sp2" style="font-size:15px;color:var(--ink)">'+s[1]+'</p>';
-  if(!last)h+='<a class="lk" href="https://console.firebase.google.com/" target="_blank" rel="noopener">Open Firebase console ↗</a>';
+  var s=WIZ[wz],L=WIZ.length,last=wz===L-1,h='<div class="wz"><div class="hr" style="align-items:center"><b style="font:700 22px Fraunces,Georgia,serif">Set up sharing</b><button class="ib" data-w="x" aria-label="Close setup">✕</button></div><div class="pbar"><i style="width:'+((wz+1)/L*100)+'%"></i></div><div class="mut">Step '+(wz+1)+' of '+L+' · free, done once, about 10 minutes. Easiest on a computer.</div><div class="box" style="display:grid;gap:12px"><h2 style="margin:0">'+s[0]+'</h2><p class="sp2" style="font-size:15px;color:var(--ink)">'+s[1]+'</p><div class="wz-img">'+s[2]+'</div>';
+  if(!last)h+='<a class="lk" href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Open Firebase console ↗ (Opens in new tab)</a>';
   if(wz===4)h+='<pre>'+RULES+'</pre><button class="go" data-w="c">Copy the rules</button>';
   if(last)h+='<textarea id="wcfg" placeholder="Paste the firebaseConfig block here" aria-label="Firebase settings"></textarea>';
   h+='</div><div class="cu">'+(wz?'<button class="chip" style="flex:1" data-w="b">Back</button>':'')+(last?'<button class="go" style="flex:2" data-w="k">Connect</button>':'<button class="go" style="flex:2" data-w="n">Next</button>')+'</div></div>';
