@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cradl – Baby Tracker</title>
 <meta name="theme-color" content="#0b4f4a" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a1413" media="(prefers-color-scheme: dark)">
@@ -778,38 +778,39 @@ h2 .badge {
   color: var(--mut);
 }
 
-/* Toast — compact pill, sits clearly above the bottom bar */
+/* Toast */
 #toast {
   position: fixed;
-  left: 50%;
-  bottom: calc(96px + var(--safe-bot));
-  max-width: min(280px, calc(100% - 28px));
-  width: max-content;
-  margin: 0;
+  left: 14px;
+  right: 14px;
+  bottom: calc(84px + var(--safe-bot));
+  max-width: 532px;
+  margin: 0 auto;
   background: #12302f;
   color: #fff;
-  border-radius: 99px;
-  padding: 6px 6px 6px 12px;
+  border-radius: 14px;
+  padding: 10px 10px 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 10px;
   z-index: 50;
-  transform: translate(-50%, 160%);
-  transition: transform .28s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 6px 18px rgba(0,0,0,.2);
-  font-size: 12px;
-  line-height: 1.3;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(14px);
+  transition: opacity .2s, transform .28s cubic-bezier(0.16,1,0.3,1), visibility .28s;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22);
 }
-#toast.on { transform: translate(-50%, 0); }
+#toast.top { top: calc(12px + var(--safe-top)); bottom: auto; transform: translateY(-14px); }
+#toast.on, #toast.top.on { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
 #toast button {
-  min-height: 26px;
-  padding: 0 10px;
+  min-height: 38px;
+  padding: 0 14px;
   font-weight: 700;
-  font-size: 11px;
   color: #6ee7b7;
-  border-radius: 99px;
-  background: rgba(255,255,255,.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,.1);
 }
 
 /* Footer links */
@@ -927,13 +928,19 @@ h2 .badge {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+/* Larger touch targets */
+.chip, .zc .chip, .tab, .foot button, #toast button { min-height: 44px; }
+.del { width: 44px; height: 44px; }
+.tip-banner button { width: 44px; height: 44px; margin: -10px -10px 0 0; }
+.it.ro { cursor: default; }
+.it.ro:hover, .it.ro:active { background: none; }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="logo" aria-label="Cradl Logo">
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%230f766e'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M130 260C130 160 210 100 280 100c80 0 130 60 130 140 0 50-20 90-50 120-15 15-40 30-70 35-20 4-45 4-70 0-40-7-70-25-90-50-20-25-30-65-30-95z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><path d='M190 320c20 30 55 50 100 55 35 4 70-5 95-25' fill='none' stroke='%23ffffff' stroke-width='22' stroke-linecap='round'/><circle cx='285' cy='230' r='36' fill='%23ffffff'/><path d='M225 245c15 15 35 25 60 25' fill='none' stroke='%230f766e' stroke-width='14' stroke-linecap='round'/></svg>" alt="Cradl" onerror="this.src='https://placehold.co/100x100/0f766e/ffffff?text=C'">
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%230f766e'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23bg)'/><path d='M130 260C130 160 210 100 280 100c80 0 130 60 130 140 0 50-20 90-50 120-15 15-40 30-70 35-20 4-45 4-70 0-40-7-70-25-90-50-20-25-30-65-30-95z' fill='none' stroke='%23ffffff' stroke-width='24' stroke-linecap='round'/><path d='M190 320c20 30 55 50 100 55 35 4 70-5 95-25' fill='none' stroke='%23ffffff' stroke-width='22' stroke-linecap='round'/><circle cx='285' cy='230' r='36' fill='%23ffffff'/><path d='M225 245c15 15 35 25 60 25' fill='none' stroke='%230f766e' stroke-width='14' stroke-linecap='round'/></svg>" alt="Cradl" onerror="this.replaceWith('🍼')">
     </div>
     <div>
       <b>Cradl</b>
@@ -999,7 +1006,7 @@ h2 .badge {
     <div class="chips" id="chips"></div>
     <div class="custom-time-box" id="ctimeBox">
       <input type="datetime-local" id="customDt" aria-label="Custom event date and time">
-      <button class="chip" id="cNowBtn" style="min-height:38px;padding:0 12px;font-size:13px">Now</button>
+      <button class="chip" id="cNowBtn" style="min-height:44px;padding:0 12px;font-size:13px">Now</button>
     </div>
     <div class="tiles" id="tiles"></div>
   </section>
@@ -1132,8 +1139,13 @@ function ago(ms) {
 }
 function save() {
   try {
+    var keep = E;
+    if (useCloud) {
+      var cur = JSON.parse(localStorage.getItem(K) || 'null');
+      keep = (cur && cur.entries) || [];
+    }
     localStorage.setItem(K, JSON.stringify({
-      entries: E,
+      entries: keep,
       lastVol: lastVol,
       lastPee: lastPee,
       lastPoo: lastPoo,
@@ -1143,14 +1155,25 @@ function save() {
 }
 function load() {
   try {
-    var r = localStorage.getItem(K);
+    var r = localStorage.getItem(K) || localStorage.getItem('cradl_v2'); // v2 = older format
     if (r) {
       var a = JSON.parse(r);
-      if (Array.isArray(a)) return { entries: a }; // migrate v2
-      if (a && Array.isArray(a.entries)) return a;
+      if (Array.isArray(a)) a = { entries: a };
+      if (a && Array.isArray(a.entries)) {
+        a.entries = a.entries.filter(valid);
+        return a;
+      }
     }
   } catch (e) {}
   return null;
+}
+var ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+function valid(e) {
+  if (!e || typeof e !== 'object' || !ID_RE.test(String(e.id)) || !META[e.c] || typeof e.t !== 'number' || !isFinite(e.t)) return false;
+  if (e.c === 'MILK') return typeof e.v === 'number' && isFinite(e.v);
+  if (e.c === 'PEE' || e.c === 'POO') return e.i === '+' || e.i === '++' || e.i === '+++';
+  if (e.c === 'SLEEP') return typeof e.d === 'number' && isFinite(e.d);
+  return true;
 }
 function sort() { E.sort(function(a, b) { return b.t - a.t; }); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -1189,20 +1212,45 @@ function getLastVol() {
   return lastVol || 150;
 }
 function getEventTimestamp() {
-  if (off === 'custom' && customTs) return customTs;
-  return Date.now() - (+off) * 6e4;
+  if (off === 'custom') {
+    var ct = customTs || ($('customDt').value ? new Date($('customDt').value).getTime() : NaN);
+    return isFinite(ct) ? ct : Date.now();
+  }
+  var t = Date.now() - (+off) * 6e4;
+  return isFinite(t) ? t : Date.now();
+}
+function toLocalInput(ts) {
+  var d = new Date(ts);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+function setCustomNow() {
+  $('customDt').value = toLocalInput(Date.now());
+  customTs = new Date($('customDt').value).getTime();
+}
+// Time chosen in the edit sheet. Returns the original time untouched unless the user changed it.
+function editTs() {
+  var el = $('editDt');
+  if (!el || !el.value) return undefined;
+  var o = E.filter(function(e) { return e.id === editId; })[0];
+  if (o && el.value === toLocalInput(o.t)) return o.t;
+  var t = new Date(el.value).getTime();
+  return isFinite(t) ? t : undefined;
 }
 
-function add(c, x, msg) {
-  var t = getEventTimestamp();
+function add(c, x, msg, ts) {
+  var t = (typeof ts === 'number' && isFinite(ts)) ? ts : getEventTimestamp();
   var o = { id: uid(), t: t, c: c };
   for (var k in x) o[k] = x[k];
   if (c === 'MILK' && o.v) lastVol = o.v;
   if (c === 'PEE' && o.i) lastPee = o.i;
   if (c === 'POO' && o.i) lastPoo = o.i;
   put(o);
-  off = 0;
-  customTs = null;
+  if (ts === undefined) {      // keep the chosen time chip when logging a timed sleep
+    off = 0;
+    customTs = null;
+    $('customDt').value = '';  // so "Exact" starts from the current time next time
+  }
   editId = null;
   render();
   toast(msg, function() { rm(o.id); });
@@ -1212,6 +1260,7 @@ function updateEntry(id, changes, msg) {
   var o = E.filter(function(e) { return e.id === id; })[0];
   if (!o) return;
   var old = JSON.parse(JSON.stringify(o));
+  if (changes.t === undefined) delete changes.t;
   for (var k in changes) o[k] = changes[k];
   if (o.c === 'MILK' && o.v) lastVol = o.v;
   if (useCloud) {
@@ -1230,13 +1279,25 @@ function updateEntry(id, changes, msg) {
   });
 }
 
+// Sit just above whatever is at the bottom (action bar or open sheet); go to the top while the setup guide is open.
+function placeToast() {
+  var t = $('toast'), vh = window.innerHeight;
+  if ($('wiz').classList.contains('on')) { t.classList.add('top'); t.style.bottom = 'auto'; return; }
+  t.classList.remove('top');
+  var edge = vh, bar = document.querySelector('.bottom-bar');
+  if (bar) edge = Math.min(edge, bar.getBoundingClientRect().top);
+  if ($('sheet').classList.contains('on')) edge = Math.min(edge, $('sheet').getBoundingClientRect().top);
+  t.style.bottom = Math.max(8, vh - edge + 10) + 'px';
+}
+window.addEventListener('resize', function() { if ($('toast').classList.contains('on')) placeToast(); });
 function toast(m, fn) {
   $('tmsg').textContent = m;
   undoFn = fn;
   $('tundo').style.display = fn ? '' : 'none';
+  placeToast();
   $('toast').classList.add('on');
   clearTimeout(tT);
-  tT = setTimeout(function() { $('toast').classList.remove('on'); }, 3200);
+  tT = setTimeout(function() { $('toast').classList.remove('on'); }, 4500);
 }
 $('tundo').onclick = function() {
   if (undoFn) undoFn();
@@ -1286,7 +1347,8 @@ function openSheet(k, prefill) {
   }
 
   if (editId) {
-    h += '<div class="sheet-actions"><button class="go" data-a="saveEdit" style="display:none">Save changes</button><button class="ghost" data-a="cancelEdit">Cancel</button></div>';
+    h += '<div class="sp2">Time</div><div class="cu"><input id="editDt" type="datetime-local" value="' + toLocalInput(prefill.t) + '" aria-label="Entry date and time"></div>';
+    h += '<div class="sheet-actions"><button class="go" data-a="saveEdit">Save time</button><button class="ghost" data-a="cancelEdit">Cancel</button></div>';
   }
 
   $('sheet').innerHTML = h;
@@ -1308,7 +1370,7 @@ $('sheet').onclick = function(e) {
 
   if (a === 'milk') {
     if (editId) {
-      updateEntry(editId, { v: v, t: getEventTimestamp() }, 'Updated to ' + v + ' mL');
+      updateEntry(editId, { v: v, t: editTs() }, 'Updated to ' + v + ' mL');
       closeSheet();
     } else {
       closeSheet();
@@ -1317,7 +1379,7 @@ $('sheet').onclick = function(e) {
   } else if (a === 'milkC') {
     if (n >= 5 && n <= 500) {
       if (editId) {
-        updateEntry(editId, { v: Math.round(n), t: getEventTimestamp() }, 'Updated to ' + Math.round(n) + ' mL');
+        updateEntry(editId, { v: Math.round(n), t: editTs() }, 'Updated to ' + Math.round(n) + ' mL');
         closeSheet();
       } else {
         closeSheet();
@@ -1326,7 +1388,7 @@ $('sheet').onclick = function(e) {
     } else if (inp) inp.focus();
   } else if (a === 'dia') {
     if (editId) {
-      updateEntry(editId, { i: b.dataset.v, t: getEventTimestamp() }, 'Updated');
+      updateEntry(editId, { i: b.dataset.v, t: editTs() }, 'Updated');
       closeSheet();
     } else {
       closeSheet();
@@ -1334,7 +1396,7 @@ $('sheet').onclick = function(e) {
     }
   } else if (a === 'slp') {
     if (editId) {
-      updateEntry(editId, { d: v, t: getEventTimestamp() }, 'Updated sleep');
+      updateEntry(editId, { d: v, t: editTs() }, 'Updated sleep');
       closeSheet();
     } else {
       closeSheet();
@@ -1343,7 +1405,7 @@ $('sheet').onclick = function(e) {
   } else if (a === 'slpC') {
     if (n >= 5 && n <= 720) {
       if (editId) {
-        updateEntry(editId, { d: Math.round(n), t: getEventTimestamp() }, 'Updated sleep');
+        updateEntry(editId, { d: Math.round(n), t: editTs() }, 'Updated sleep');
         closeSheet();
       } else {
         closeSheet();
@@ -1366,10 +1428,14 @@ $('sheet').onclick = function(e) {
   else if (a === 'paste') { pasteInvite(inp ? inp.value : ''); }
   else if (a === 'fleave') {
     if (confirm('Stop sharing on this phone? The shared log stays online for your partner.')) leaveFam();
+  } else if (a === 'saveEdit') {
+    var ts2 = editTs();
+    if (ts2 !== undefined) updateEntry(editId, { t: ts2 }, 'Time updated');
+    closeSheet();
   } else if (a === 'cancelEdit') { closeSheet(); }
 };
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeSheet();
+  if (e.key === 'Escape') { closeSheet(); $('wiz').classList.remove('on'); }
 });
 
 /* ---------- Static UI ---------- */
@@ -1393,19 +1459,22 @@ $('chips').onclick = function(e) {
   var b = e.target.closest('[data-o]');
   if (!b) return;
   var val = b.dataset.o;
+  var was = off;
   off = (val === 'custom') ? 'custom' : +val;
-  if (off !== 'custom') customTs = null;
+  if (off === 'custom') { if (was !== 'custom') setCustomNow(); }
+  else customTs = null;
   renderChips();
   updateQuickLabel();
 };
 
 $('customDt').onchange = function() {
-  if ($('customDt').value) customTs = new Date($('customDt').value).getTime();
+  customTs = $('customDt').value ? new Date($('customDt').value).getTime() : null;
 };
 
 $('cNowBtn').onclick = function() {
   off = 0;
   customTs = null;
+  $('customDt').value = '';
   renderChips();
   updateQuickLabel();
 };
@@ -1439,11 +1508,12 @@ function startSleep() {
 }
 function stopSleep() {
   if (!sleepStart) return;
-  var mins = Math.max(1, Math.round((Date.now() - sleepStart) / 6e4));
+  var started = sleepStart,
+      mins = Math.max(1, Math.round((Date.now() - started) / 6e4));
   sleepStart = null;
   save();
   updateSleepUI();
-  add('SLEEP', { d: mins }, 'Logged ' + dur(mins) + ' sleep');
+  add('SLEEP', { d: mins }, 'Logged ' + dur(mins) + ' sleep', started);
 }
 function updateSleepUI() {
   var on = !!sleepStart;
@@ -1457,6 +1527,7 @@ function tickSleep() {
   var sec = Math.floor((Date.now() - sleepStart) / 1000);
   var m = Math.floor(sec / 60), s = sec % 60;
   $('sleepLive').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  if (s === 0) timeline();
 }
 $('sleepStop').onclick = stopSleep;
 
@@ -1504,9 +1575,10 @@ function hero() {
     e = E[i];
     if (e.c === 'MILK' && !lf && e.t <= now) lf = e;
     if ((e.c === 'PEE' || e.c === 'POO') && !ld && e.t <= now) ld = e;
-    if (e.t >= s0 && e.t < s0 + DAY) {
-      if (e.c === 'MILK') ml += e.v;
-      if (e.c === 'SLEEP') sl += e.d;
+    if (e.c === 'SLEEP') {
+      sl += Math.max(0, Math.min(e.t + (e.d || 0) * 6e4, s0 + DAY) - Math.max(e.t, s0)) / 6e4;
+    } else if (e.c === 'MILK' && e.t >= s0 && e.t < s0 + DAY) {
+      ml += e.v;
     }
   }
   $('ml').textContent = Math.round(ml);
@@ -1529,7 +1601,7 @@ function hero() {
     $('sFeed').textContent = '--';
   }
   $('sDia').textContent = ld ? ago(now - ld.t) : '--';
-  $('sSlp').textContent = sl ? dur(sl) : '0m';
+  $('sSlp').textContent = sl >= 1 ? dur(Math.round(sl)) : '0m';
   updateQuickLabel();
 }
 
@@ -1585,7 +1657,8 @@ function timeline() {
   var nh = (now - s0) / H;
   if (nh >= zs && nh <= ze) h += '<span class="now" style="left:' + X(nh) + '%"></span>';
   E.forEach(function(e) {
-    if (e.t < s0 || e.t >= s0 + DAY) return;
+    if (e.t >= s0 + DAY) return;
+    if (e.c !== 'SLEEP' && e.t < s0) return;   // sleep that began yesterday can still reach into today
     var a = (e.t - s0) / H, tip = fT(e.t) + ' · ' + title(e);
     if (e.c === 'SLEEP') {
       var l = Math.max(a, zs), r = Math.min(a + e.d / 60, ze);
@@ -1625,7 +1698,8 @@ function history() {
       h += '<div class="day">' + lab + '</div>';
       last = lab;
     }
-    h += '<div class="it" data-edit="' + e.id + '">' +
+    var ro = (e.c === 'BATH' || e.c === 'VITD');
+    h += '<div class="it' + (ro ? ' ro' : '') + '"' + (ro ? '' : ' data-edit="' + e.id + '" role="button" tabindex="0"') + '>' +
       '<span class="ic">' + META[e.c][0] + '</span>' +
       '<div class="tx"><b>' + title(e) + '</b><small>' + fT(e.t) + '</small></div>' +
       '<button class="del" data-del="' + e.id + '" aria-label="Delete entry">✕</button>' +
@@ -1658,19 +1732,31 @@ $('log').onclick = function(ev) {
   }
 };
 
+$('log').onkeydown = function(ev) {
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('[data-edit]')) {
+    ev.preventDefault();
+    ev.target.click();
+  }
+};
+
 var isRendering = false;
 function render() {
   if (isRendering) return;
   isRendering = true;
   requestAnimationFrame(function() {
-    renderChips();
-    renderTiles();
-    hero();
-    chart();
-    timeline();
-    history();
-    updateSleepUI();
-    isRendering = false;
+    try {
+      renderChips();
+      renderTiles();
+      hero();
+      chart();
+      timeline();
+      history();
+      updateSleepUI();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      isRendering = false;
+    }
   });
 }
 
@@ -1958,7 +2044,7 @@ function startCloud() {
   mode();
   $('sub').textContent = 'Shared · connecting…';
   u1 = col().onSnapshot({ includeMetadataChanges: true }, function(s) {
-    E = s.docs.map(function(d) { return d.data(); });
+    E = s.docs.map(function(d) { return d.data(); }).filter(valid);
     sort();
     $('sub').textContent = 'Shared · ' + (s.metadata.hasPendingWrites ? 'saving…' : (s.metadata.fromCache && !navigator.onLine) ? 'offline' : 'synced');
     render();
